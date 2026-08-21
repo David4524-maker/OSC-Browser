@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>OCS Browser</title>
+  <style>
+    body { margin: 0; height: 100vh; font-family: sans-serif; background: #0c0f17; color: white; display: flex; flex-direction: column; }
+    
+    /* Barra Superior (Visible durante navegación) */
+    #nav-bar { background: #1a2234; padding: 10px; display: none; gap: 8px; border-bottom: 2px solid #3b82f6; align-items: center; }
+    #url-bar { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #334155; background: #0c0f17; color: white; }
+    button { padding: 6px 12px; border-radius: 6px; border: none; background: #3b82f6; color: white; cursor: pointer; }
+
+    /* Pantalla Principal (Home) */
+    #home-screen { 
+        flex: 1; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 20px; 
+        background-image: url('fondo.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    .search-box { width: 500px; padding: 15px; border-radius: 25px; border: 1px solid #3b82f6; background: #1a2234; color: white; text-align: center; font-size: 16px; }
+    .shortcuts-grid { display: flex; gap: 15px; }
+    .shortcut { width: 80px; height: 80px; background: #1a2234; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid #334155; }
+    
+    #browser-view { flex: 1; border: none; background: white; display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de navegación que aparece al navegar -->
+  <div id="nav-bar">
+    <button onclick="goHome()">🏠</button>
+    <input type="text" id="url-bar" placeholder="Escribe una URL...">
+    <button onclick="navigate()">IR</button>
+  </div>
+
+  <!-- Pantalla de Inicio -->
+  <div id="home-screen">
+    <h1>OSC Browser</h1>
+    <input type="text" id="search-input" class="search-box" placeholder="Buscar o escribir URL...">
+    <div class="shortcuts-grid" id="shortcuts">
+       <!-- Accesos rápidos -->
+       <div class="shortcut" onclick="openUrl('https://www.google.com')">Google</div>
+       <div class="shortcut" onclick="openUrl('https://www.wikipedia.org')">Wiki</div>
+       <div class="shortcut" onclick="openUrl('https://www.youtube.com')">YT</div>
+    </div>
+  </div>
+
+  <iframe id="browser-view"></iframe>
+
+  <script>
+    const navBar = document.getElementById('nav-bar');
+    const homeScreen = document.getElementById('home-screen');
+    const browserView = document.getElementById('browser-view');
+    const urlInput = document.getElementById('url-bar');
+    const searchInput = document.getElementById('search-input');
+
+    function openUrl(url) {
+      homeScreen.style.display = 'none';
+      navBar.style.display = 'flex';
+      browserView.style.display = 'block';
+      browserView.src = url;
+      urlInput.value = url;
+    }
+
+    function navigate() {
+      openUrl(urlInput.value.startsWith('http') ? urlInput.value : 'https://' + urlInput.value);
+    }
+
+    function goHome() {
+      homeScreen.style.display = 'flex';
+      navBar.style.display = 'none';
+      browserView.style.display = 'none';
+    }
+
+    // Permitir buscar con Enter
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') openUrl(searchInput.value.startsWith('http') ? searchInput.value : 'https://' + searchInput.value);
+    });
+  </script>
+</body>
+</html>
