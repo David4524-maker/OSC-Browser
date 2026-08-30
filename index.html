@@ -123,6 +123,10 @@
       transition: background 0.3s, opacity 0.2s;
     }
     button:hover { opacity: 0.9; }
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
 
     /* Área de Contenido Principal */
     #content-area {
@@ -283,6 +287,10 @@
   </div>
 
   <div id="nav-bar">
+    <!-- Botones de Deshacer y Rehacer -->
+    <button id="btn-undo" onclick="goBack()" title="Deshacer (Atrás)" data-i18n-title="undoTitle" disabled>↩️</button>
+    <button id="btn-redo" onclick="goForward()" title="Rehacer (Adelante)" data-i18n-title="redoTitle" disabled>↪️</button>
+    
     <button id="btn-home" onclick="goHome()" title="Inicio" data-i18n-title="homeTitle">🏠</button>
     <button id="btn-reload" onclick="reloadTab()" title="Recargar página" data-i18n-title="reloadTitle">🔄</button>
     <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
@@ -365,6 +373,8 @@
     // Diccionario de Traducciones
     const translations = {
       es: {
+        undoTitle: "Deshacer (Atrás)",
+        redoTitle: "Rehacer (Adelante)",
         menuLabel: "Menú:",
         accentLabel: "Bordes/Botones:",
         uploadPc: "📁 Subir PC",
@@ -385,6 +395,8 @@
         promptBgUrl: "Ingresa la URL de la imagen para el fondo:"
       },
       en: {
+        undoTitle: "Undo (Back)",
+        redoTitle: "Redo (Forward)",
         menuLabel: "Menu:",
         accentLabel: "Borders/Buttons:",
         uploadPc: "📁 Upload PC",
@@ -428,7 +440,6 @@
 
     /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
     function loadSettings() {
-      // 1. Cargar Idioma
       const savedLang = localStorage.getItem('ocs_lang');
       if (savedLang && translations[savedLang]) {
         document.getElementById('lang-selector').value = savedLang;
@@ -437,25 +448,15 @@
         changeLanguage('es');
       }
 
-      // 2. Cargar Color de Menú
       const savedMenuColor = localStorage.getItem('ocs_menu_color');
-      if (savedMenuColor) {
-        updateMenuColor(savedMenuColor);
-      }
+      if (savedMenuColor) updateMenuColor(savedMenuColor);
 
-      // 3. Cargar Color de Bordes / Botones
       const savedAccentColor = localStorage.getItem('ocs_accent_color');
-      if (savedAccentColor) {
-        updateAccentColor(savedAccentColor);
-      }
+      if (savedAccentColor) updateAccentColor(savedAccentColor);
 
-      // 4. Cargar Fondo de Pantalla
       const savedBg = localStorage.getItem('ocs_bg_image');
-      if (savedBg) {
-        homeScreen.style.backgroundImage = savedBg;
-      }
+      if (savedBg) homeScreen.style.backgroundImage = savedBg;
 
-      // 5. Cargar Motor de Búsqueda
       const savedEngine = localStorage.getItem('ocs_engine');
       if (savedEngine && searchEngines[savedEngine]) {
         document.getElementById('engine-selector').value = savedEngine;
@@ -469,23 +470,19 @@
 
       const t = translations[langKey];
 
-      // Actualizar elementos de texto con data-i18n
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (t[key]) el.textContent = t[key];
       });
 
-      // Actualizar atributos title con data-i18n-title
       document.querySelectorAll('[data-i18n-title]').forEach(el => {
         const key = el.getAttribute('data-i18n-title');
         if (t[key]) el.title = t[key];
       });
 
-      // Actualizar placeholders
       urlInput.placeholder = t.urlPlaceholder;
       changeSearchEngine(currentEngine);
 
-      // Actualizar nombres de pestañas predeterminadas
       tabs.forEach(tab => {
         if (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault) {
           tab.title = t.newTabDefault;
@@ -512,11 +509,19 @@
       iframe.id = `iframe-${id}`;
       iframesContainer.appendChild(iframe);
 
+      const defaultHomeState = {
+        type: 'home',
+        url: '',
+        title: translations[currentLang].newTabDefault
+      };
+
       const tabObj = {
         id: id,
         url: '',
         title: translations[currentLang].newTabDefault,
-        iframeEl: iframe
+        iframeEl: iframe,
+        history: [defaultHomeState],
+        historyIndex: 0
       };
 
       tabs.push(tabObj);
@@ -535,16 +540,69 @@
 
       document.querySelectorAll('.tab-iframe').forEach(f => f.style.display = 'none');
 
-      if (!tab.url) {
+      const currentState = tab.history[tab.historyIndex] || { type: 'home', url: '', title: tab.title };
+      loadHistoryState(tab, currentState);
+      renderTabs();
+      updateNavButtons();
+    }
+
+    /* Manejo del Historial (Deshacer / Rehacer) */
+    function loadHistoryState(tab, state) {
+      tab.url = state.url;
+      tab.title = state.title;
+
+      if (state.type === 'home' || !state.url) {
         homeScreen.style.display = 'flex';
+        tab.iframeEl.style.display = 'none';
         urlInput.value = '';
+      } else if (state.type === 'osc') {
+        homeScreen.style.display = 'none';
+        tab.iframeEl.removeAttribute('src');
+        tab.iframeEl.srcdoc = generateOscSearchHTML(state.query);
+        tab.iframeEl.style.display = 'block';
+        urlInput.value = state.url;
       } else {
         homeScreen.style.display = 'none';
+        tab.iframeEl.removeAttribute('srcdoc');
+        tab.iframeEl.src = state.url;
         tab.iframeEl.style.display = 'block';
-        urlInput.value = tab.url;
+        urlInput.value = state.url;
+      }
+    }
+
+    function goBack() {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.historyIndex > 0) {
+        activeTab.historyIndex--;
+        loadHistoryState(activeTab, activeTab.history[activeTab.historyIndex]);
+        renderTabs();
+        updateNavButtons();
+      }
+    }
+
+    function goForward() {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.historyIndex < activeTab.history.length - 1) {
+        activeTab.historyIndex++;
+        loadHistoryState(activeTab, activeTab.history[activeTab.historyIndex]);
+        renderTabs();
+        updateNavButtons();
+      }
+    }
+
+    function updateNavButtons() {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      const btnUndo = document.getElementById('btn-undo');
+      const btnRedo = document.getElementById('btn-redo');
+
+      if (!activeTab || !activeTab.history) {
+        btnUndo.disabled = true;
+        btnRedo.disabled = true;
+        return;
       }
 
-      renderTabs();
+      btnUndo.disabled = activeTab.historyIndex <= 0;
+      btnRedo.disabled = activeTab.historyIndex >= activeTab.history.length - 1;
     }
 
     function closeTab(id, event) {
@@ -646,40 +704,36 @@
       if (!activeTab || !input) return;
 
       const trimmed = input.trim();
-      let targetUrl = '';
+      let newState = {};
 
       if (/^https?:\/\//i.test(trimmed)) {
-        targetUrl = trimmed;
+        newState = { type: 'web', url: trimmed, title: getDomainOrQuery(input, trimmed) };
       } else if (!trimmed.includes(' ') && trimmed.includes('.')) {
-        targetUrl = 'https://' + trimmed;
+        const fullUrl = 'https://' + trimmed;
+        newState = { type: 'web', url: fullUrl, title: getDomainOrQuery(input, fullUrl) };
       } else {
         const engine = searchEngines[currentEngine] || searchEngines.osc;
         if (currentEngine === 'osc') {
-          activeTab.url = 'osc://search?q=' + encodeURIComponent(trimmed);
-          activeTab.title = `⚡ ${trimmed}`;
-          activeTab.iframeEl.removeAttribute('src');
-          activeTab.iframeEl.srcdoc = generateOscSearchHTML(trimmed);
-          
-          homeScreen.style.display = 'none';
-          activeTab.iframeEl.style.display = 'block';
-          urlInput.value = activeTab.url;
-          renderTabs();
-          return;
+          newState = {
+            type: 'osc',
+            url: 'osc://search?q=' + encodeURIComponent(trimmed),
+            title: `⚡ ${trimmed}`,
+            query: trimmed
+          };
         } else {
-          targetUrl = engine.url + encodeURIComponent(trimmed);
+          const targetUrl = engine.url + encodeURIComponent(trimmed);
+          newState = { type: 'web', url: targetUrl, title: getDomainOrQuery(input, targetUrl) };
         }
       }
 
-      activeTab.url = targetUrl;
-      activeTab.title = getDomainOrQuery(input, targetUrl);
-      activeTab.iframeEl.removeAttribute('srcdoc');
-      activeTab.iframeEl.src = targetUrl;
+      // Descartar historial futuro si navegamos desde una posición intermedia
+      activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
+      activeTab.history.push(newState);
+      activeTab.historyIndex = activeTab.history.length - 1;
 
-      homeScreen.style.display = 'none';
-      activeTab.iframeEl.style.display = 'block';
-      urlInput.value = targetUrl;
-
+      loadHistoryState(activeTab, newState);
       renderTabs();
+      updateNavButtons();
     }
 
     function navigate() {
@@ -704,14 +758,22 @@
     function goHome() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab) {
-        activeTab.url = '';
-        activeTab.title = translations[currentLang].newTabDefault;
-        activeTab.iframeEl.style.display = 'none';
-        activeTab.iframeEl.removeAttribute('srcdoc');
-        activeTab.iframeEl.src = '';
-        homeScreen.style.display = 'flex';
-        urlInput.value = '';
+        const currentState = activeTab.history[activeTab.historyIndex];
+        if (currentState && currentState.type === 'home') return;
+
+        const homeState = {
+          type: 'home',
+          url: '',
+          title: translations[currentLang].newTabDefault
+        };
+
+        activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
+        activeTab.history.push(homeState);
+        activeTab.historyIndex = activeTab.history.length - 1;
+
+        loadHistoryState(activeTab, homeState);
         renderTabs();
+        updateNavButtons();
       }
     }
 
