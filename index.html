@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>OCS Browser</title>
+  <title>OCS Browser - Navegador de páginas sin Copyright</title>
   <style>
     :root {
       --menu-bg: #1a2234;
@@ -426,8 +426,47 @@
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
 
+    /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
+    function loadSettings() {
+      // 1. Cargar Idioma
+      const savedLang = localStorage.getItem('ocs_lang');
+      if (savedLang && translations[savedLang]) {
+        document.getElementById('lang-selector').value = savedLang;
+        changeLanguage(savedLang);
+      } else {
+        changeLanguage('es');
+      }
+
+      // 2. Cargar Color de Menú
+      const savedMenuColor = localStorage.getItem('ocs_menu_color');
+      if (savedMenuColor) {
+        updateMenuColor(savedMenuColor);
+      }
+
+      // 3. Cargar Color de Bordes / Botones
+      const savedAccentColor = localStorage.getItem('ocs_accent_color');
+      if (savedAccentColor) {
+        updateAccentColor(savedAccentColor);
+      }
+
+      // 4. Cargar Fondo de Pantalla
+      const savedBg = localStorage.getItem('ocs_bg_image');
+      if (savedBg) {
+        homeScreen.style.backgroundImage = savedBg;
+      }
+
+      // 5. Cargar Motor de Búsqueda
+      const savedEngine = localStorage.getItem('ocs_engine');
+      if (savedEngine && searchEngines[savedEngine]) {
+        document.getElementById('engine-selector').value = savedEngine;
+        changeSearchEngine(savedEngine);
+      }
+    }
+
     function changeLanguage(langKey) {
       currentLang = langKey;
+      localStorage.setItem('ocs_lang', langKey);
+
       const t = translations[langKey];
 
       // Actualizar elementos de texto con data-i18n
@@ -436,7 +475,7 @@
         if (t[key]) el.textContent = t[key];
       });
 
-      // Actualizar atutributos title con data-i18n-title
+      // Actualizar atributos title con data-i18n-title
       document.querySelectorAll('[data-i18n-title]').forEach(el => {
         const key = el.getAttribute('data-i18n-title');
         if (t[key]) el.title = t[key];
@@ -446,7 +485,7 @@
       urlInput.placeholder = t.urlPlaceholder;
       changeSearchEngine(currentEngine);
 
-      // Actualizar nombres de pestañas predeterminadas no renombradas
+      // Actualizar nombres de pestañas predeterminadas
       tabs.forEach(tab => {
         if (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault) {
           tab.title = t.newTabDefault;
@@ -457,6 +496,8 @@
 
     function changeSearchEngine(engineKey) {
       currentEngine = engineKey;
+      localStorage.setItem('ocs_engine', engineKey);
+
       const engine = searchEngines[engineKey];
       const t = translations[currentLang];
       searchInput.placeholder = t.searchPlaceholder.replace('{engine}', engine.name);
@@ -693,7 +734,13 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          homeScreen.style.backgroundImage = `url('${e.target.result}')`;
+          const bgVal = `url('${e.target.result}')`;
+          homeScreen.style.backgroundImage = bgVal;
+          try {
+            localStorage.setItem('ocs_bg_image', bgVal);
+          } catch (err) {
+            console.warn('La imagen seleccionada es muy grande para almacenarse en LocalStorage.');
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -702,23 +749,28 @@
     function setBgUrl() {
       const url = prompt(translations[currentLang].promptBgUrl);
       if (url && url.trim() !== '') {
-        homeScreen.style.backgroundImage = `url('${url.trim()}')`;
+        const bgVal = `url('${url.trim()}')`;
+        homeScreen.style.backgroundImage = bgVal;
+        localStorage.setItem('ocs_bg_image', bgVal);
       }
     }
 
     function resetBg() {
       homeScreen.style.backgroundImage = "url('fondo.jpg')";
+      localStorage.removeItem('ocs_bg_image');
     }
 
     /* Personalización de color */
     function updateMenuColor(color) {
       document.documentElement.style.setProperty('--menu-bg', color);
       bgColorPicker.value = color;
+      localStorage.setItem('ocs_menu_color', color);
     }
 
     function updateAccentColor(color) {
       document.documentElement.style.setProperty('--accent-color', color);
       accentColorPicker.value = color;
+      localStorage.setItem('ocs_accent_color', color);
     }
 
     function setPreset(menuColor, accentColor) {
@@ -738,9 +790,9 @@
       if (e.key === 'Enter') navigate();
     });
 
-    // Inicializar navegador
+    // Inicializar navegador y cargar configuraciones
     createNewTab();
-    changeLanguage('es');
+    loadSettings();
   </script>
 </body>
 </html>
