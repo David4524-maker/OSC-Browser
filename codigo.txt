@@ -140,9 +140,11 @@
       top: 0; left: 0; right: 0; bottom: 0;
       display: flex; 
       flex-direction: column; 
-      justify-content: center; 
+      justify-content: flex-start;
       align-items: center; 
       gap: 20px; 
+      padding: 80px 20px 20px 20px;
+      overflow-y: auto;
       background-image: url('fondo.jpg');
       background-size: cover;
       background-position: center;
@@ -165,6 +167,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       transition: background 0.3s;
       flex-wrap: wrap;
+      z-index: 20;
     }
     .color-picker-group {
       display: flex;
@@ -212,7 +215,8 @@
     .search-container {
       display: flex;
       align-items: center;
-      width: 580px;
+      width: 100%;
+      max-width: 580px;
       background: var(--menu-bg);
       border: 2px solid var(--accent-color);
       border-radius: 25px;
@@ -249,7 +253,7 @@
       outline: none;
     }
 
-    .shortcuts-grid { display: flex; gap: 15px; }
+    .shortcuts-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
     .shortcut { 
       width: 80px; 
       height: 80px; 
@@ -267,7 +271,109 @@
       border-color: var(--accent-color);
       transform: translateY(-3px);
     }
-    
+
+    /* Sección de Webs Guardadas */
+    #installed-apps-section {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(26, 34, 52, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      margin-top: 10px;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 15px;
+      margin-top: 12px;
+    }
+
+    .app-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 6px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .app-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-color);
+    }
+    .app-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    .app-name {
+      font-size: 11px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      color: #cbd5e1;
+    }
+    .app-delete {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 16px;
+      height: 16px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .app-card:hover .app-delete {
+      display: flex;
+    }
+
+    /* Modal / Ventana de Guardar Web */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+    .modal-box {
+      background: var(--menu-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 14px;
+      padding: 24px;
+      width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-box h3 { margin: 0; color: white; display: flex; align-items: center; gap: 8px; }
+    .modal-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #94a3b8; }
+    .modal-field input {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: white;
+      outline: none;
+    }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
     .tab-iframe {
       width: 100%;
       height: 100%;
@@ -287,7 +393,6 @@
   </div>
 
   <div id="nav-bar">
-    <!-- Botones de Deshacer y Rehacer -->
     <button id="btn-undo" onclick="goBack()" title="Deshacer (Atrás)" data-i18n-title="undoTitle" disabled>↩️</button>
     <button id="btn-redo" onclick="goForward()" title="Rehacer (Adelante)" data-i18n-title="redoTitle" disabled>↪️</button>
     
@@ -295,13 +400,15 @@
     <button id="btn-reload" onclick="reloadTab()" title="Recargar página" data-i18n-title="reloadTitle">🔄</button>
     <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
     <button id="btn-go" onclick="navigate()" data-i18n="goBtn">IR</button>
+    
+    <!-- Botón de Guardar Web -->
+    <button id="btn-install" onclick="openInstallModal()" title="Guardar web" data-i18n-title="installAppTitle" style="background:#10b981;">💾</button>
   </div>
 
   <div id="content-area">
     
     <div id="home-screen">
       <div class="color-settings">
-        <!-- Selector de Idioma -->
         <div class="color-picker-group">
           <label for="lang-selector">🌐</label>
           <select id="lang-selector" class="lang-select" onchange="changeLanguage(this.value)">
@@ -358,10 +465,48 @@
          <div class="shortcut" onclick="openUrl('https://www.wikipedia.org')">Wiki</div>
          <div class="shortcut" onclick="openUrl('https://www.youtube.com')">YT</div>
       </div>
+
+      <!-- Sección de Webs Guardadas -->
+      <div id="installed-apps-section">
+        <div style="font-size: 14px; font-weight: bold; color: white;" data-i18n="installedAppsTitle">📌 Mis Webs Guardadas</div>
+        <div id="apps-container" class="apps-grid"></div>
+      </div>
     </div>
 
     <div id="iframes-container"></div>
 
+  </div>
+
+  <!-- Modal para Guardar Web -->
+  <div id="install-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 data-i18n="modalTitle">💾 Guardar Web</h3>
+      
+      <div class="modal-field">
+        <label data-i18n="appNameLabel">Nombre de la página:</label>
+        <input type="text" id="app-name-input" placeholder="Ej: Mi Sitio Web">
+      </div>
+
+      <div class="modal-field">
+        <label data-i18n="appUrlLabel">URL o Búsqueda:</label>
+        <input type="text" id="app-url-input" placeholder="https://...">
+      </div>
+
+      <div class="modal-field">
+        <label data-i18n="appIconLabel">Icono / Emoji:</label>
+        <input type="text" id="app-icon-input" value="🌐" style="width: 60px; text-align: center;">
+      </div>
+
+      <div id="pwa-native-option" style="display:none; font-size:12px; background:rgba(16, 185, 129, 0.2); border:1px solid #10b981; padding:8px; border-radius:6px; color:#6ee7b7;">
+        💡 <span data-i18n="pwaAvailable">¡OCS Browser puede instalarse como app nativa en tu dispositivo!</span>
+        <button onclick="triggerPwaInstall()" style="margin-top:6px; width:100%; background:#10b981;" data-i18n="installNativeBtn">Instalar OCS Browser en PC/Móvil</button>
+      </div>
+
+      <div class="modal-buttons">
+        <button onclick="closeInstallModal()" style="background:#64748b;" data-i18n="cancelBtn">Cancelar</button>
+        <button onclick="saveInstalledApp()" style="background:#10b981;" data-i18n="confirmInstallBtn">Guardar</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -369,6 +514,8 @@
     let activeTabId = null;
     let tabIdCounter = 0;
     let currentLang = 'es';
+    let installedApps = [];
+    let deferredPrompt = null;
 
     // Diccionario de Traducciones
     const translations = {
@@ -392,7 +539,18 @@
         commonsDesc: "Repositorio con millones de imágenes, audios y videos de contenido libre sin copyright.",
         openverseDesc: "Motor de búsqueda para más de 600 millones de imágenes y audios con licencias Creative Commons.",
         archiveDesc: "Accede a libros, películas, software y páginas web históricas preservadas en dominio público.",
-        promptBgUrl: "Ingresa la URL de la imagen para el fondo:"
+        promptBgUrl: "Ingresa la URL de la imagen para el fondo:",
+        installAppTitle: "Guardar web",
+        installedAppsTitle: "📌 Mis Webs Guardadas",
+        modalTitle: "💾 Guardar Web",
+        appNameLabel: "Nombre de la página:",
+        appUrlLabel: "URL o Búsqueda:",
+        appIconLabel: "Icono / Emoji:",
+        cancelBtn: "Cancelar",
+        confirmInstallBtn: "Guardar",
+        pwaAvailable: "¡OCS Browser puede instalarse como app nativa en tu sistema!",
+        installNativeBtn: "Instalar OCS Browser en PC/Móvil",
+        emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!"
       },
       en: {
         undoTitle: "Undo (Back)",
@@ -414,7 +572,18 @@
         commonsDesc: "Repository with millions of free images, audio, and videos without copyright.",
         openverseDesc: "Search engine for over 600 million images and audio under Creative Commons licenses.",
         archiveDesc: "Access books, movies, software, and historical web pages preserved in the public domain.",
-        promptBgUrl: "Enter the image URL for the background:"
+        promptBgUrl: "Enter the image URL for the background:",
+        installAppTitle: "Save web page",
+        installedAppsTitle: "📌 My Saved Web Pages",
+        modalTitle: "💾 Save Web Page",
+        appNameLabel: "Page Name:",
+        appUrlLabel: "URL or Search:",
+        appIconLabel: "Icon / Emoji:",
+        cancelBtn: "Cancel",
+        confirmInstallBtn: "Save",
+        pwaAvailable: "OCS Browser can be installed as a native app on your system!",
+        installNativeBtn: "Install OCS Browser on PC/Mobile",
+        emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!"
       }
     };
 
@@ -437,6 +606,27 @@
     const searchInput = document.getElementById('search-input');
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
+
+    /* Capta evento de instalación PWA nativa en dispositivos */
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const pwaOpt = document.getElementById('pwa-native-option');
+      if (pwaOpt) pwaOpt.style.display = 'block';
+    });
+
+    function triggerPwaInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('El usuario aceptó la instalación nativa.');
+          }
+          deferredPrompt = null;
+          closeInstallModal();
+        });
+      }
+    }
 
     /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
     function loadSettings() {
@@ -462,6 +652,8 @@
         document.getElementById('engine-selector').value = savedEngine;
         changeSearchEngine(savedEngine);
       }
+
+      loadInstalledApps();
     }
 
     function changeLanguage(langKey) {
@@ -489,6 +681,7 @@
         }
       });
       renderTabs();
+      renderAppsGrid();
     }
 
     function changeSearchEngine(engineKey) {
@@ -546,7 +739,7 @@
       updateNavButtons();
     }
 
-    /* Manejo del Historial (Deshacer / Rehacer) */
+    /* Manejo del Historial */
     function loadHistoryState(tab, state) {
       tab.url = state.url;
       tab.title = state.title;
@@ -607,7 +800,6 @@
 
     function closeTab(id, event) {
       event.stopPropagation();
-      
       const tabIndex = tabs.findIndex(t => t.id === id);
       if (tabIndex === -1) return;
 
@@ -646,6 +838,110 @@
         tabEl.appendChild(closeBtn);
         tabsContainer.appendChild(tabEl);
       });
+    }
+
+    /* SISTEMA DE WEBS GUARDADAS */
+    function openInstallModal() {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      const nameInput = document.getElementById('app-name-input');
+      const urlInputModal = document.getElementById('app-url-input');
+      const iconInput = document.getElementById('app-icon-input');
+
+      if (activeTab && activeTab.url) {
+        nameInput.value = activeTab.title || 'Mi Sitio Web';
+        urlInputModal.value = activeTab.url;
+        iconInput.value = getEmojiForUrl(activeTab.url);
+      } else {
+        nameInput.value = '';
+        urlInputModal.value = '';
+        iconInput.value = '🌐';
+      }
+
+      const pwaOpt = document.getElementById('pwa-native-option');
+      pwaOpt.style.display = deferredPrompt ? 'block' : 'none';
+
+      document.getElementById('install-modal').style.display = 'flex';
+    }
+
+    function closeInstallModal() {
+      document.getElementById('install-modal').style.display = 'none';
+    }
+
+    function saveInstalledApp() {
+      const name = document.getElementById('app-name-input').value.trim();
+      const url = document.getElementById('app-url-input').value.trim();
+      const icon = document.getElementById('app-icon-input').value.trim() || '🌐';
+
+      if (!name || !url) {
+        alert("Por favor completa el nombre y la URL.");
+        return;
+      }
+
+      const newApp = { id: Date.now(), name: name, url: url, icon: icon };
+      installedApps.push(newApp);
+      localStorage.setItem('ocs_installed_apps', JSON.stringify(installedApps));
+
+      renderAppsGrid();
+      closeInstallModal();
+    }
+
+    function deleteApp(appId, e) {
+      e.stopPropagation();
+      installedApps = installedApps.filter(app => app.id !== appId);
+      localStorage.setItem('ocs_installed_apps', JSON.stringify(installedApps));
+      renderAppsGrid();
+    }
+
+    function loadInstalledApps() {
+      const saved = localStorage.getItem('ocs_installed_apps');
+      if (saved) {
+        try {
+          installedApps = JSON.parse(saved);
+        } catch(e) {
+          installedApps = [];
+        }
+      } else {
+        // Webs predeterminadas recomendadas
+        installedApps = [
+          { id: 1, name: 'Wikipedia', url: 'https://www.wikipedia.org', icon: '📚' },
+          { id: 2, name: 'Openverse', url: 'https://openverse.org', icon: '🖼️' },
+          { id: 3, name: 'Archive.org', url: 'https://archive.org', icon: '🏛️' }
+        ];
+      }
+      renderAppsGrid();
+    }
+
+    function renderAppsGrid() {
+      const container = document.getElementById('apps-container');
+      container.innerHTML = '';
+
+      if (installedApps.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; text-align: center; padding: 10px;">${translations[currentLang].emptyApps}</div>`;
+        return;
+      }
+
+      installedApps.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'app-card';
+        card.onclick = () => openUrl(app.url);
+
+        card.innerHTML = `
+          <div class="app-icon">${app.icon}</div>
+          <div class="app-name">${app.name}</div>
+          <div class="app-delete" onclick="deleteApp(${app.id}, event)">✕</div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function getEmojiForUrl(url) {
+      if (url.includes('wikipedia')) return '📚';
+      if (url.includes('youtube')) return '▶️';
+      if (url.includes('google')) return '🌐';
+      if (url.includes('archive.org')) return '🏛️';
+      if (url.includes('openverse')) return '🖼️';
+      return '📌';
     }
 
     // Generador de la página de resultados propia de OSC Search
@@ -726,7 +1022,6 @@
         }
       }
 
-      // Descartar historial futuro si navegamos desde una posición intermedia
       activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
       activeTab.history.push(newState);
       activeTab.historyIndex = activeTab.history.length - 1;
