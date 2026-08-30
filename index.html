@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>OCS Browser - Navegador de páginas sin Copyright</title>
+  <title>OCS Browser</title>
   <style>
     :root {
       --menu-bg: #1a2234;
@@ -176,6 +176,18 @@
       cursor: pointer;
       background: transparent;
     }
+
+    .lang-select {
+      background: var(--bg-dark);
+      color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
     .preset-btn {
       width: 18px;
       height: 18px;
@@ -267,27 +279,38 @@
 
   <div id="tabs-bar">
     <div id="tabs-container" style="display:flex; gap:4px;"></div>
-    <button class="add-tab-btn" onclick="createNewTab()" title="Nueva pestaña">+</button>
+    <button class="add-tab-btn" onclick="createNewTab()" title="Nueva pestaña" data-i18n-title="newTabTitle">+</button>
   </div>
 
   <div id="nav-bar">
-    <button onclick="goHome()" title="Inicio">🏠</button>
-    <button onclick="reloadTab()" title="Recargar página">🔄</button>
+    <button id="btn-home" onclick="goHome()" title="Inicio" data-i18n-title="homeTitle">🏠</button>
+    <button id="btn-reload" onclick="reloadTab()" title="Recargar página" data-i18n-title="reloadTitle">🔄</button>
     <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
-    <button onclick="navigate()">IR</button>
+    <button id="btn-go" onclick="navigate()" data-i18n="goBtn">IR</button>
   </div>
 
   <div id="content-area">
     
     <div id="home-screen">
       <div class="color-settings">
+        <!-- Selector de Idioma -->
+        <div class="color-picker-group">
+          <label for="lang-selector">🌐</label>
+          <select id="lang-selector" class="lang-select" onchange="changeLanguage(this.value)">
+            <option value="es" selected>Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <span style="border-left: 1px solid var(--border-color); height: 16px; margin: 0 4px;"></span>
+
         🎨 
         <div class="color-picker-group">
-          <label for="bg-color-picker">Menú:</label>
+          <label for="bg-color-picker" data-i18n="menuLabel">Menú:</label>
           <input type="color" id="bg-color-picker" value="#1a2234" onchange="updateMenuColor(this.value)">
         </div>
         <div class="color-picker-group">
-          <label for="accent-color-picker">Bordes/Botones:</label>
+          <label for="accent-color-picker" data-i18n="accentLabel">Bordes/Botones:</label>
           <input type="color" id="accent-color-picker" value="#3b82f6" onchange="updateAccentColor(this.value)">
         </div>
 
@@ -300,9 +323,9 @@
         </div>
 
         <span style="border-left: 1px solid var(--border-color); padding-left: 8px; margin-left: 4px;">🖼️</span>
-        <button class="bg-btn" onclick="document.getElementById('bg-file-input').click()">📁 Subir PC</button>
-        <button class="bg-btn" onclick="setBgUrl()">🔗 URL</button>
-        <button class="bg-btn" onclick="resetBg()" title="Restaurar fondo.jpg">↩️</button>
+        <button class="bg-btn" onclick="document.getElementById('bg-file-input').click()" data-i18n="uploadPc">📁 Subir PC</button>
+        <button class="bg-btn" onclick="setBgUrl()" data-i18n="urlBg">🔗 URL</button>
+        <button class="bg-btn" onclick="resetBg()" title="Restaurar fondo.jpg" data-i18n-title="restoreBgTitle">↩️</button>
 
         <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="setBgFile(event)">
       </div>
@@ -311,7 +334,7 @@
 
       <div class="search-container">
         <select id="engine-selector" class="engine-select" onchange="changeSearchEngine(this.value)">
-          <option value="osc">🌎 OSC Search (Propio)</option>
+          <option value="osc">⚡ OSC Search (Propio)</option>
           <option value="google">🌐 Google</option>
           <option value="duckduckgo">🦆 DuckDuckGo</option>
           <option value="bing">🔍 Bing</option>
@@ -337,10 +360,55 @@
     let tabs = [];
     let activeTabId = null;
     let tabIdCounter = 0;
+    let currentLang = 'es';
+
+    // Diccionario de Traducciones
+    const translations = {
+      es: {
+        menuLabel: "Menú:",
+        accentLabel: "Bordes/Botones:",
+        uploadPc: "📁 Subir PC",
+        urlBg: "🔗 URL",
+        restoreBgTitle: "Restaurar fondo.jpg",
+        homeTitle: "Inicio",
+        reloadTitle: "Recargar página",
+        newTabTitle: "Nueva pestaña",
+        urlPlaceholder: "Escribe una URL o busca...",
+        goBtn: "IR",
+        searchPlaceholder: "Buscar en {engine} o escribir URL...",
+        newTabDefault: "Nueva pestaña",
+        oscTitle: "Resultados libres de derechos para:",
+        wikiDesc: "Explora contenido libre de derechos de autor e información de libre acceso en la enciclopedia global.",
+        commonsDesc: "Repositorio con millones de imágenes, audios y videos de contenido libre sin copyright.",
+        openverseDesc: "Motor de búsqueda para más de 600 millones de imágenes y audios con licencias Creative Commons.",
+        archiveDesc: "Accede a libros, películas, software y páginas web históricas preservadas en dominio público.",
+        promptBgUrl: "Ingresa la URL de la imagen para el fondo:"
+      },
+      en: {
+        menuLabel: "Menu:",
+        accentLabel: "Borders/Buttons:",
+        uploadPc: "📁 Upload PC",
+        urlBg: "🔗 URL",
+        restoreBgTitle: "Restore background.jpg",
+        homeTitle: "Home",
+        reloadTitle: "Reload page",
+        newTabTitle: "New tab",
+        urlPlaceholder: "Type a URL or search...",
+        goBtn: "GO",
+        searchPlaceholder: "Search in {engine} or type URL...",
+        newTabDefault: "New tab",
+        oscTitle: "Copyright-free results for:",
+        wikiDesc: "Explore copyright-free content and open-access information in the global encyclopedia.",
+        commonsDesc: "Repository with millions of free images, audio, and videos without copyright.",
+        openverseDesc: "Search engine for over 600 million images and audio under Creative Commons licenses.",
+        archiveDesc: "Access books, movies, software, and historical web pages preserved in the public domain.",
+        promptBgUrl: "Enter the image URL for the background:"
+      }
+    };
 
     // Configuración de motores de búsqueda
     const searchEngines = {
-      osc: { name: 'OSC Search', url: 'internal', icon: '🌎' },
+      osc: { name: 'OSC Search', url: 'internal', icon: '⚡' },
       google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
       duckduckgo: { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: '🦆' },
       bing: { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🔍' },
@@ -358,10 +426,40 @@
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
 
+    function changeLanguage(langKey) {
+      currentLang = langKey;
+      const t = translations[langKey];
+
+      // Actualizar elementos de texto con data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+      });
+
+      // Actualizar atutributos title con data-i18n-title
+      document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (t[key]) el.title = t[key];
+      });
+
+      // Actualizar placeholders
+      urlInput.placeholder = t.urlPlaceholder;
+      changeSearchEngine(currentEngine);
+
+      // Actualizar nombres de pestañas predeterminadas no renombradas
+      tabs.forEach(tab => {
+        if (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault) {
+          tab.title = t.newTabDefault;
+        }
+      });
+      renderTabs();
+    }
+
     function changeSearchEngine(engineKey) {
       currentEngine = engineKey;
       const engine = searchEngines[engineKey];
-      searchInput.placeholder = `Buscar en ${engine.name} o escribir URL...`;
+      const t = translations[currentLang];
+      searchInput.placeholder = t.searchPlaceholder.replace('{engine}', engine.name);
     }
 
     function createNewTab(input = '') {
@@ -376,7 +474,7 @@
       const tabObj = {
         id: id,
         url: '',
-        title: 'Nueva pestaña',
+        title: translations[currentLang].newTabDefault,
         iframeEl: iframe
       };
 
@@ -453,6 +551,7 @@
 
     // Generador de la página de resultados propia de OSC Search
     function generateOscSearchHTML(query) {
+      const t = translations[currentLang];
       return `
         <!DOCTYPE html>
         <html>
@@ -470,31 +569,31 @@
           </style>
         </head>
         <body>
-          <h1>🌎 OSC Search</h1>
-          <div class="query">Resultados libres de derechos para: <strong>"${query}"</strong></div>
+          <h1>⚡ OSC Search</h1>
+          <div class="query">${t.oscTitle} <strong>"${query}"</strong></div>
 
           <div class="result-card">
             <span class="tag">Open Source / Wiki</span>
             <h3><a href="https://es.wikipedia.org/wiki/${encodeURIComponent(query)}" target="_self">Wikipedia: ${query}</a></h3>
-            <p>Explora contenido libre de derechos de autor e información de libre acceso en la enciclopedia global.</p>
+            <p>${t.wikiDesc}</p>
           </div>
 
           <div class="result-card">
             <span class="tag">Dominio Público</span>
             <h3><a href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(query)}" target="_self">Wikimedia Commons - Medios de "${query}"</a></h3>
-            <p>Repositorio con millones de imágenes, audios y videos de contenido libre sin copyright.</p>
+            <p>${t.commonsDesc}</p>
           </div>
 
           <div class="result-card">
             <span class="tag">Búsqueda Abierta</span>
-            <h3><a href="https://openverse.org/search/?q=${encodeURIComponent(query)}" target="_self">Openverse - Búsqueda de recursos CC</a></h3>
-            <p>Motor de búsqueda para más de 600 millones de imágenes y audios con licencias Creative Commons.</p>
+            <h3><a href="https://openverse.org/search/?q=${encodeURIComponent(query)}" target="_self">Openverse - Recursos CC</a></h3>
+            <p>${t.openverseDesc}</p>
           </div>
 
           <div class="result-card">
             <span class="tag">Archivos Libres</span>
             <h3><a href="https://archive.org/details/texts?query=${encodeURIComponent(query)}" target="_self">Internet Archive - Bibliotecas de "${query}"</a></h3>
-            <p>Accede a libros, películas, software y páginas web históricas preservadas en dominio público.</p>
+            <p>${t.archiveDesc}</p>
           </div>
         </body>
         </html>
@@ -516,7 +615,7 @@
         const engine = searchEngines[currentEngine] || searchEngines.osc;
         if (currentEngine === 'osc') {
           activeTab.url = 'osc://search?q=' + encodeURIComponent(trimmed);
-          activeTab.title = `🌎 ${trimmed}`;
+          activeTab.title = `⚡ ${trimmed}`;
           activeTab.iframeEl.removeAttribute('src');
           activeTab.iframeEl.srcdoc = generateOscSearchHTML(trimmed);
           
@@ -565,7 +664,7 @@
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab) {
         activeTab.url = '';
-        activeTab.title = 'Nueva pestaña';
+        activeTab.title = translations[currentLang].newTabDefault;
         activeTab.iframeEl.style.display = 'none';
         activeTab.iframeEl.removeAttribute('srcdoc');
         activeTab.iframeEl.src = '';
@@ -601,7 +700,7 @@
     }
 
     function setBgUrl() {
-      const url = prompt('Ingresa la URL de la imagen para el fondo:');
+      const url = prompt(translations[currentLang].promptBgUrl);
       if (url && url.trim() !== '') {
         homeScreen.style.backgroundImage = `url('${url.trim()}')`;
       }
@@ -641,6 +740,7 @@
 
     // Inicializar navegador
     createNewTab();
+    changeLanguage('es');
   </script>
 </body>
 </html>
