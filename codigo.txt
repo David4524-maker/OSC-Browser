@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>OCS Browser - Navegador de páginas sin Copyright</title>
+  <title>OCS Browser - Navegador Seguro y sin Copyright</title>
   <style>
     :root {
       --menu-bg: #1a2234;
       --accent-color: #3b82f6;
       --bg-dark: #0c0f17;
       --border-color: #334155;
+      --shield-color: #10b981;
     }
 
     body { 
@@ -103,15 +104,34 @@
       align-items: center; 
       transition: background 0.3s, border-color 0.3s;
     }
+
+    .url-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding-left: 8px;
+    }
+
+    .security-badge {
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      user-select: none;
+    }
+
     #url-bar { 
       flex: 1; 
-      padding: 8px; 
-      border-radius: 6px; 
-      border: 1px solid var(--border-color); 
-      background: var(--bg-dark); 
+      padding: 8px 8px 8px 4px; 
+      border: none;
+      background: transparent; 
       color: white; 
       outline: none;
     }
+
     button { 
       padding: 6px 12px; 
       border-radius: 6px; 
@@ -364,13 +384,21 @@
     }
     .modal-box h3 { margin: 0; color: white; display: flex; align-items: center; gap: 8px; }
     .modal-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #94a3b8; }
-    .modal-field input {
+    .modal-field input[type="text"], .modal-field input[type="password"] {
       background: var(--bg-dark);
       border: 1px solid var(--border-color);
       padding: 8px 10px;
       border-radius: 6px;
       color: white;
       outline: none;
+    }
+    .modal-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #cbd5e1;
+      cursor: pointer;
     }
     .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 
@@ -428,10 +456,16 @@
     
     <button id="btn-home" onclick="goHome()" title="Inicio" data-i18n-title="homeTitle">🏠</button>
     <button id="btn-reload" onclick="reloadTab()" title="Recargar página" data-i18n-title="reloadTitle">🔄</button>
-    <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
+    
+    <div class="url-container">
+      <span id="security-badge" class="security-badge" onclick="openSecurityModal()" title="Estado de Seguridad">🛡️</span>
+      <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
+    </div>
+
     <button id="btn-go" onclick="navigate()" data-i18n="goBtn">IR</button>
     
-    <!-- Botón de Guardar Web -->
+    <!-- Botones de Acción -->
+    <button id="btn-security-panel" onclick="openSecurityModal()" title="Centro de Seguridad" style="background:#0284c7;">🛡️</button>
     <button id="btn-install" onclick="openInstallModal()" title="Guardar web" data-i18n-title="installAppTitle" style="background:#10b981;">💾</button>
   </div>
 
@@ -507,6 +541,44 @@
 
   </div>
 
+  <!-- Modal del Centro de Seguridad -->
+  <div id="security-modal" class="modal-overlay">
+    <div class="modal-box" style="width: 420px;">
+      <h3>🛡️ <span data-i18n="securityTitle">Centro de Seguridad OSC</span></h3>
+      
+      <div id="security-status-box" style="padding: 10px; border-radius: 8px; font-size: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;">
+        <b>Estado:</b> <span id="security-status-text">Protección activa y conexión segura.</span>
+      </div>
+
+      <div class="modal-checkbox">
+        <input type="checkbox" id="sec-shield-toggle" onchange="toggleSecurityOption('shieldEnabled', this.checked)">
+        <label for="sec-shield-toggle" data-i18n="secShieldLabel"><b>Escudo en Tiempo Real:</b> Bloquea dominios phishing y ejecutables peligrosos.</label>
+      </div>
+
+      <div class="modal-checkbox">
+        <input type="checkbox" id="sec-http-toggle" onchange="toggleSecurityOption('warnHttp', this.checked)">
+        <label for="sec-http-toggle" data-i18n="secHttpLabel"><b>Advertir sitios no cifrados (HTTP):</b> Alerta si una web no usa conexión segura HTTPS.</label>
+      </div>
+
+      <div class="modal-checkbox">
+        <input type="checkbox" id="sec-exe-toggle" onchange="toggleSecurityOption('blockExecutables', this.checked)">
+        <label for="sec-exe-toggle" data-i18n="secExeLabel"><b>Bloquear enlaces ejecutables:</b> Previene descargas directas de archivos .exe, .bat, etc.</label>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border-color); width: 100%; margin: 4px 0;">
+
+      <div class="modal-field">
+        <label data-i18n="pinLabel">🔑 PIN de Control Parental / Bloqueo (Opcional):</label>
+        <input type="password" id="sec-pin-input" placeholder="Ingresa PIN de 4 dígitos" maxlength="4">
+      </div>
+
+      <div class="modal-buttons">
+        <button onclick="savePinConfig()" style="background:#0284c7;" data-i18n="savePinBtn">Guardar PIN</button>
+        <button onclick="closeSecurityModal()" style="background:#64748b;" data-i18n="cancelBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal para Guardar Web -->
   <div id="install-modal" class="modal-overlay">
     <div class="modal-box">
@@ -539,7 +611,7 @@
     </div>
   </div>
 
-  <!-- Modal de Bienvenida (Primera vez) -->
+  <!-- Modal de Bienvenida -->
   <div id="welcome-modal" class="modal-overlay">
     <div class="welcome-box">
       <div class="welcome-icon">🚀</div>
@@ -548,7 +620,7 @@
       
       <div class="welcome-features">
         <div data-i18n="welcomeFeature1">⚡ <b>OSC Search:</b> Encuentra resultados y medios libres de derechos.</div>
-        <div data-i18n="welcomeFeature2">🎨 <b>Personalizable:</b> Cambia colores, temas y fondos a tu gusto.</div>
+        <div data-i18n="welcomeFeature2">🛡️ <b>Protección Integrada:</b> Filtro en tiempo real contra sitios no seguros y phishing.</div>
         <div data-i18n="welcomeFeature3">💾 <b>Webs Guardadas:</b> Ancla tus sitios preferidos para entrar en 1 clic.</div>
       </div>
 
@@ -563,6 +635,18 @@
     let currentLang = 'es';
     let installedApps = [];
     let deferredPrompt = null;
+
+    // Configuración de Seguridad
+    let securityConfig = {
+      shieldEnabled: true,
+      warnHttp: true,
+      blockExecutables: true,
+      pin: ''
+    };
+
+    // Lista de dominios/palabras clave peligrosas o de prueba
+    const suspiciousKeywords = ['phishing', 'fake-login', 'free-money-now', 'account-verify-stealer', 'malware-download'];
+    const dangerousExtensions = ['.exe', '.bat', '.vbs', '.cmd', '.scr', '.msi', '.ps1'];
 
     // Diccionario de Traducciones
     const translations = {
@@ -599,11 +683,17 @@
         installNativeBtn: "Instalar OCS Browser en PC/Móvil",
         emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!",
         welcomeTitle: "¡Bienvenido a OCS Browser! 👋",
-        welcomeDesc: "Tu navegador ultraligero enfocado en contenido libre. Diseñado para explorar la web de forma rápida y personalizable.",
+        welcomeDesc: "Tu navegador ultraligero enfocado en contenido libre y navegación segura.",
         welcomeFeature1: "⚡ <b>OSC Search:</b> Encuentra resultados y medios libres de derechos.",
-        welcomeFeature2: "🎨 <b>Personalizable:</b> Cambia colores, temas y fondos a tu gusto.",
+        welcomeFeature2: "🛡️ <b>Protección Integrada:</b> Filtro en tiempo real contra sitios no seguros y phishing.",
         welcomeFeature3: "💾 <b>Webs Guardadas:</b> Ancla tus sitios preferidos para entrar en 1 clic.",
-        welcomeBtn: "¡Empezar a navegar! 🚀"
+        welcomeBtn: "¡Empezar a navegar! 🚀",
+        securityTitle: "Centro de Seguridad OSC",
+        secShieldLabel: "<b>Escudo en Tiempo Real:</b> Bloquea dominios phishing y ejecutable peligrosos.",
+        secHttpLabel: "<b>Advertir sitios no cifrados (HTTP):</b> Alerta si una web no usa HTTPS.",
+        secExeLabel: "<b>Bloquear enlaces ejecutables:</b> Previene descargas directas de .exe, .bat, etc.",
+        pinLabel: "🔑 PIN de Control Parental / Bloqueo (Opcional):",
+        savePinBtn: "Guardar PIN"
       },
       en: {
         undoTitle: "Undo (Back)",
@@ -638,11 +728,17 @@
         installNativeBtn: "Install OCS Browser on PC/Mobile",
         emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!",
         welcomeTitle: "Welcome to OCS Browser! 👋",
-        welcomeDesc: "Your lightweight browser focused on open content. Designed to explore the web fast and with full customization.",
+        welcomeDesc: "Your lightweight browser focused on open content and secure browsing.",
         welcomeFeature1: "⚡ <b>OSC Search:</b> Find copyright-free search results and media.",
-        welcomeFeature2: "🎨 <b>Customizable:</b> Change colors, themes, and wallpapers easily.",
+        welcomeFeature2: "🛡️ <b>Integrated Protection:</b> Real-time shield against unsafe sites & phishing.",
         welcomeFeature3: "💾 <b>Saved Webs:</b> Pin your favorite websites for 1-click access.",
-        welcomeBtn: "Start Browsing! 🚀"
+        welcomeBtn: "Start Browsing! 🚀",
+        securityTitle: "OSC Security Center",
+        secShieldLabel: "<b>Real-Time Shield:</b> Block phishing domains and unsafe executables.",
+        secHttpLabel: "<b>Warn Unencrypted Sites (HTTP):</b> Alert if a website does not use HTTPS.",
+        secExeLabel: "<b>Block Executables:</b> Prevent direct downloads of .exe, .bat files, etc.",
+        pinLabel: "🔑 Parental Control / Lock PIN (Optional):",
+        savePinBtn: "Save PIN"
       }
     };
 
@@ -666,7 +762,7 @@
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
 
-    /* Capta evento de instalación PWA nativa en dispositivos */
+    /* PWA Prompt */
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -677,14 +773,150 @@
     function triggerPwaInstall() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('El usuario aceptó la instalación nativa.');
-          }
+        deferredPrompt.userChoice.then(() => {
           deferredPrompt = null;
           closeInstallModal();
         });
       }
+    }
+
+    /* === CÓDIGO DEL SISTEMA DE SEGURIDAD === */
+    function loadSecurityConfig() {
+      const savedSec = localStorage.getItem('ocs_security_config');
+      if (savedSec) {
+        try { securityConfig = { ...securityConfig, ...JSON.parse(savedSec) }; } catch(e){}
+      }
+      document.getElementById('sec-shield-toggle').checked = securityConfig.shieldEnabled;
+      document.getElementById('sec-http-toggle').checked = securityConfig.warnHttp;
+      document.getElementById('sec-exe-toggle').checked = securityConfig.blockExecutables;
+      document.getElementById('sec-pin-input').value = securityConfig.pin || '';
+      updateSecurityBadge('safe');
+    }
+
+    function toggleSecurityOption(key, val) {
+      securityConfig[key] = val;
+      localStorage.setItem('ocs_security_config', JSON.stringify(securityConfig));
+    }
+
+    function savePinConfig() {
+      const pinVal = document.getElementById('sec-pin-input').value.trim();
+      securityConfig.pin = pinVal;
+      localStorage.setItem('ocs_security_config', JSON.stringify(securityConfig));
+      alert(pinVal ? "¡PIN de seguridad guardado correctamente!" : "PIN eliminado.");
+      closeSecurityModal();
+    }
+
+    function openSecurityModal() {
+      if (securityConfig.pin) {
+        const enteredPin = prompt("Ingresa el PIN de seguridad para acceder a la configuración:");
+        if (enteredPin !== securityConfig.pin) {
+          alert("PIN incorrecto.");
+          return;
+        }
+      }
+      document.getElementById('security-modal').style.display = 'flex';
+    }
+
+    function closeSecurityModal() {
+      document.getElementById('security-modal').style.display = 'none';
+    }
+
+    function updateSecurityBadge(status, customMsg = '') {
+      const badge = document.getElementById('security-badge');
+      const statusText = document.getElementById('security-status-text');
+      const statusBox = document.getElementById('security-status-box');
+
+      if (status === 'safe') {
+        badge.innerHTML = '🛡️';
+        badge.style.color = '#10b981';
+        badge.title = 'Sitio seguro (HTTPS)';
+        if (statusText) statusText.textContent = customMsg || 'Conexión cifrada y protección activa.';
+        if (statusBox) {
+          statusBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          statusBox.style.borderColor = '#10b981';
+          statusBox.style.color = '#6ee7b7';
+        }
+      } else if (status === 'warn') {
+        badge.innerHTML = '⚠️';
+        badge.style.color = '#f59e0b';
+        badge.title = 'Precaución: Sitio no cifrado (HTTP)';
+        if (statusText) statusText.textContent = customMsg || 'Advertencia: La conexión no es HTTPS.';
+        if (statusBox) {
+          statusBox.style.background = 'rgba(245, 158, 11, 0.2)';
+          statusBox.style.borderColor = '#f59e0b';
+          statusBox.style.color = '#fde047';
+        }
+      } else if (status === 'danger') {
+        badge.innerHTML = '🛑';
+        badge.style.color = '#ef4444';
+        badge.title = 'Sitio bloqueado por seguridad';
+        if (statusText) statusText.textContent = customMsg || '¡Peligro! Sitio sospechoso bloqueado.';
+        if (statusBox) {
+          statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          statusBox.style.borderColor = '#ef4444';
+          statusBox.style.color = '#fca5a5';
+        }
+      }
+    }
+
+    function evaluateUrlSecurity(url) {
+      if (!url || url.startsWith('osc://')) return { status: 'safe', reason: '' };
+
+      const lowerUrl = url.toLowerCase();
+
+      // 1. Verificar extensiones peligrosas
+      if (securityConfig.blockExecutables) {
+        for (let ext of dangerousExtensions) {
+          if (lowerUrl.endsWith(ext) || lowerUrl.includes(ext + '?')) {
+            return { status: 'danger', reason: `Se ha bloqueado la descarga/ejecución directa de archivos peligrosos (${ext}).` };
+          }
+        }
+      }
+
+      // 2. Escudo contra dominios o términos de phishing sospechosos
+      if (securityConfig.shieldEnabled) {
+        for (let kw of suspiciousKeywords) {
+          if (lowerUrl.includes(kw)) {
+            return { status: 'danger', reason: `El sitio contiene patrones sospechosos o posibles amenazas de Phishing/Malware ("${kw}").` };
+          }
+        }
+      }
+
+      // 3. Advertencia de sitios HTTP no seguros
+      if (securityConfig.warnHttp && lowerUrl.startsWith('http://')) {
+        return { status: 'warn', reason: 'Este sitio web no utiliza una conexión cifrada HTTPS. Tus datos podrían no estar protegidos.' };
+      }
+
+      return { status: 'safe', reason: '' };
+    }
+
+    function generateBlockedPageHTML(targetUrl, reason) {
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: sans-serif; background: #0c0f17; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+            .card { background: #1a2234; border: 2px solid #ef4444; border-radius: 16px; padding: 40px; max-width: 480px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); }
+            .icon { font-size: 60px; margin-bottom: 10px; }
+            h2 { color: #ef4444; margin: 0 0 12px 0; }
+            p { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+            .url-display { background: #0c0f17; padding: 8px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #fca5a5; word-break: break-all; margin-bottom: 20px; }
+            button { background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+            button:hover { background: #475569; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">🛑</div>
+            <h2>Acceso Bloqueado por Seguridad</h2>
+            <div class="url-display">${targetUrl}</div>
+            <p>${reason}</p>
+            <button onclick="window.parent.goHome()">Volver al Inicio Seguro 🏠</button>
+          </div>
+        </body>
+        </html>
+      `;
     }
 
     /* === MENEJO DE PRIMERA VISITA / BIENVENIDA === */
@@ -702,6 +934,8 @@
 
     /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
     function loadSettings() {
+      loadSecurityConfig();
+
       const savedLang = localStorage.getItem('ocs_lang');
       if (savedLang && translations[savedLang]) {
         document.getElementById('lang-selector').value = savedLang;
@@ -812,7 +1046,7 @@
       updateNavButtons();
     }
 
-    /* Manejo del Historial */
+    /* Manejo del Historial y Navegación con Filtro de Seguridad */
     function loadHistoryState(tab, state) {
       tab.url = state.url;
       tab.title = state.title;
@@ -821,16 +1055,29 @@
         homeScreen.style.display = 'flex';
         tab.iframeEl.style.display = 'none';
         urlInput.value = '';
+        updateSecurityBadge('safe', 'Página de inicio protegida.');
       } else if (state.type === 'osc') {
         homeScreen.style.display = 'none';
         tab.iframeEl.removeAttribute('src');
         tab.iframeEl.srcdoc = generateOscSearchHTML(state.query);
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
+        updateSecurityBadge('safe', 'Motor OSC Search seguro.');
       } else {
+        // Evaluación de Seguridad antes de cargar
+        const secEval = evaluateUrlSecurity(state.url);
+        updateSecurityBadge(secEval.status, secEval.reason);
+
         homeScreen.style.display = 'none';
-        tab.iframeEl.removeAttribute('srcdoc');
-        tab.iframeEl.src = state.url;
+
+        if (secEval.status === 'danger') {
+          tab.iframeEl.removeAttribute('src');
+          tab.iframeEl.srcdoc = generateBlockedPageHTML(state.url, secEval.reason);
+        } else {
+          tab.iframeEl.removeAttribute('srcdoc');
+          tab.iframeEl.src = state.url;
+        }
+
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
       }
@@ -960,6 +1207,13 @@
 
     function deleteApp(appId, e) {
       e.stopPropagation();
+      if (securityConfig.pin) {
+        const pin = prompt("Ingresa el PIN para eliminar una web guardada:");
+        if (pin !== securityConfig.pin) {
+          alert("PIN incorrecto.");
+          return;
+        }
+      }
       installedApps = installedApps.filter(app => app.id !== appId);
       localStorage.setItem('ocs_installed_apps', JSON.stringify(installedApps));
       renderAppsGrid();
@@ -968,13 +1222,8 @@
     function loadInstalledApps() {
       const saved = localStorage.getItem('ocs_installed_apps');
       if (saved) {
-        try {
-          installedApps = JSON.parse(saved);
-        } catch(e) {
-          installedApps = [];
-        }
+        try { installedApps = JSON.parse(saved); } catch(e) { installedApps = []; }
       } else {
-        // Webs predeterminadas recomendadas
         installedApps = [
           { id: 1, name: 'Wikipedia', url: 'https://www.wikipedia.org', icon: '📚' },
           { id: 2, name: 'Openverse', url: 'https://openverse.org', icon: '🖼️' },
@@ -1017,7 +1266,6 @@
       return '📌';
     }
 
-    // Generador de la página de resultados propia de OSC Search
     function generateOscSearchHTML(query) {
       const t = translations[currentLang];
       return `
@@ -1113,13 +1361,7 @@
     function reloadTab() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && activeTab.url) {
-        if (activeTab.iframeEl.srcdoc) {
-          const content = activeTab.iframeEl.srcdoc;
-          activeTab.iframeEl.srcdoc = '';
-          activeTab.iframeEl.srcdoc = content;
-        } else {
-          activeTab.iframeEl.src = activeTab.url;
-        }
+        loadHistoryState(activeTab, activeTab.history[activeTab.historyIndex]);
       }
     }
 
@@ -1169,7 +1411,7 @@
           try {
             localStorage.setItem('ocs_bg_image', bgVal);
           } catch (err) {
-            console.warn('La imagen seleccionada es muy grande para almacenarse en LocalStorage.');
+            console.warn('Imagen muy grande para LocalStorage.');
           }
         };
         reader.readAsDataURL(file);
