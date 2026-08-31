@@ -340,7 +340,7 @@
       display: flex;
     }
 
-    /* Modal / Ventana de Guardar Web */
+    /* Modales Generales */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -373,6 +373,36 @@
       outline: none;
     }
     .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+    /* Modal de Bienvenida */
+    .welcome-box {
+      background: var(--menu-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 18px;
+      padding: 28px;
+      width: 420px;
+      max-width: 90%;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    .welcome-icon { font-size: 42px; }
+    .welcome-box h2 { margin: 0; color: white; font-size: 22px; }
+    .welcome-box p { font-size: 13px; color: #94a3b8; margin: 0; line-height: 1.5; }
+    .welcome-features {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
 
     .tab-iframe {
       width: 100%;
@@ -509,6 +539,23 @@
     </div>
   </div>
 
+  <!-- Modal de Bienvenida (Primera vez) -->
+  <div id="welcome-modal" class="modal-overlay">
+    <div class="welcome-box">
+      <div class="welcome-icon">🚀</div>
+      <h2 data-i18n="welcomeTitle">¡Bienvenido a OCS Browser! 👋</h2>
+      <p data-i18n="welcomeDesc">Tu navegador ultraligero enfocado en contenido libre. Diseñado para explorar la web de forma rápida y personalizable.</p>
+      
+      <div class="welcome-features">
+        <div data-i18n="welcomeFeature1">⚡ <b>OSC Search:</b> Encuentra resultados y medios libres de derechos.</div>
+        <div data-i18n="welcomeFeature2">🎨 <b>Personalizable:</b> Cambia colores, temas y fondos a tu gusto.</div>
+        <div data-i18n="welcomeFeature3">💾 <b>Webs Guardadas:</b> Ancla tus sitios preferidos para entrar en 1 clic.</div>
+      </div>
+
+      <button onclick="closeWelcomeModal()" style="padding: 10px; font-size: 14px; border-radius: 8px;" data-i18n="welcomeBtn">¡Empezar a navegar! 🚀</button>
+    </div>
+  </div>
+
   <script>
     let tabs = [];
     let activeTabId = null;
@@ -550,7 +597,13 @@
         confirmInstallBtn: "Guardar",
         pwaAvailable: "¡OCS Browser puede instalarse como app nativa en tu sistema!",
         installNativeBtn: "Instalar OCS Browser en PC/Móvil",
-        emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!"
+        emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!",
+        welcomeTitle: "¡Bienvenido a OCS Browser! 👋",
+        welcomeDesc: "Tu navegador ultraligero enfocado en contenido libre. Diseñado para explorar la web de forma rápida y personalizable.",
+        welcomeFeature1: "⚡ <b>OSC Search:</b> Encuentra resultados y medios libres de derechos.",
+        welcomeFeature2: "🎨 <b>Personalizable:</b> Cambia colores, temas y fondos a tu gusto.",
+        welcomeFeature3: "💾 <b>Webs Guardadas:</b> Ancla tus sitios preferidos para entrar en 1 clic.",
+        welcomeBtn: "¡Empezar a navegar! 🚀"
       },
       en: {
         undoTitle: "Undo (Back)",
@@ -583,7 +636,13 @@
         confirmInstallBtn: "Save",
         pwaAvailable: "OCS Browser can be installed as a native app on your system!",
         installNativeBtn: "Install OCS Browser on PC/Mobile",
-        emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!"
+        emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!",
+        welcomeTitle: "Welcome to OCS Browser! 👋",
+        welcomeDesc: "Your lightweight browser focused on open content. Designed to explore the web fast and with full customization.",
+        welcomeFeature1: "⚡ <b>OSC Search:</b> Find copyright-free search results and media.",
+        welcomeFeature2: "🎨 <b>Customizable:</b> Change colors, themes, and wallpapers easily.",
+        welcomeFeature3: "💾 <b>Saved Webs:</b> Pin your favorite websites for 1-click access.",
+        welcomeBtn: "Start Browsing! 🚀"
       }
     };
 
@@ -628,6 +687,19 @@
       }
     }
 
+    /* === MENEJO DE PRIMERA VISITA / BIENVENIDA === */
+    function checkFirstVisit() {
+      const welcomeSeen = localStorage.getItem('ocs_welcome_seen');
+      if (!welcomeSeen) {
+        document.getElementById('welcome-modal').style.display = 'flex';
+      }
+    }
+
+    function closeWelcomeModal() {
+      document.getElementById('welcome-modal').style.display = 'none';
+      localStorage.setItem('ocs_welcome_seen', 'true');
+    }
+
     /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
     function loadSettings() {
       const savedLang = localStorage.getItem('ocs_lang');
@@ -654,6 +726,7 @@
       }
 
       loadInstalledApps();
+      checkFirstVisit();
     }
 
     function changeLanguage(langKey) {
@@ -664,7 +737,7 @@
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (t[key]) el.textContent = t[key];
+        if (t[key]) el.innerHTML = t[key];
       });
 
       document.querySelectorAll('[data-i18n-title]').forEach(el => {
