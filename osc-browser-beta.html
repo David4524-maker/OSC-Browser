@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSC Browser (BETA) - Atom Edition</title>
+  <style>
+    :root {
+      --bg-dark: #121417;
+      --bg-toolbar: #1b1e23;
+      --bg-input: #262a33;
+      --accent-atom: #00d2d3;
+      --text-main: #f1f2f6;
+      --text-muted: #8c92a4;
+      --danger: #ff4757;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Barra Superior Ultra-Ligera */
+    .toolbar {
+      background: var(--bg-toolbar);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg-input);
+    }
+
+    .address-bar-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border-radius: 8px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+    }
+
+    .address-bar-container:focus-within {
+      border-color: var(--accent-atom);
+    }
+
+    .address-bar {
+      width: 100%;
+      height: 34px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    .btn-ram {
+      background: rgba(0, 210, 211, 0.15);
+      border: 1px solid var(--accent-atom);
+      color: var(--accent-atom);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .btn-ram:hover {
+      background: var(--accent-atom);
+      color: var(--bg-dark);
+    }
+
+    /* Área Principal del Navegador */
+    .viewport {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    /* Speed Dial / Accesos Directos Atom */
+    .home-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .brand h1 {
+      font-size: 2.2rem;
+      color: var(--accent-atom);
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      font-size: 0.85rem;
+      background: var(--danger);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      max-width: 650px;
+      width: 100%;
+    }
+
+    .chip {
+      background: var(--bg-toolbar);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 10px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip:hover {
+      border-color: var(--accent-atom);
+      background: #222730;
+    }
+
+    .chip-icon {
+      font-size: 1.4rem;
+    }
+
+    .chip-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    /* Barra de Estado */
+    .status-bar {
+      background: var(--bg-toolbar);
+      padding: 4px 15px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-tag {
+      color: var(--accent-atom);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación -->
+  <div class="toolbar">
+    <button class="nav-btn" onclick="goHome()" title="Inicio">🏠</button>
+    <button class="nav-btn" onclick="reloadFrame()" title="Recargar">↻</button>
+    
+    <div class="address-bar-container">
+      <input type="text" id="urlInput" class="address-bar" placeholder="Buscar en la web o escribir URL..." onkeydown="handleKeyPress(event)">
+    </div>
+
+    <button class="btn-ram" onclick="clearRAM()">🧹 Limpiar RAM</button>
+  </div>
+
+  <!-- Vista Web -->
+  <div class="viewport">
+    <div id="homeScreen" class="home-screen">
+      <div class="brand">
+        <h1>OSC Browser <span>BETA</span></h1>
+        <p style="color: var(--text-muted); margin-top: 5px; font-size: 0.85rem;">Modo ultra-rápido sin animaciones</p>
+      </div>
+
+      <div class="quick-links">
+        <div class="chip" onclick="loadURL('https://frogfind.com')">
+          <span class="chip-icon">🐸</span>
+          <span>FrogFind</span>
+          <span class="chip-desc">Buscador retro ultra-ligero</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://html.duckduckgo.com/html/')">
+          <span class="chip-icon">🦆</span>
+          <span>DDG Lite</span>
+          <span class="chip-desc">Sin scripts pesados</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://es.m.wikipedia.org')">
+          <span class="chip-icon">📚</span>
+          <span>Wikipedia Móvil</span>
+          <span class="chip-desc">Carga rápida de texto</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://text.npr.org')">
+          <span class="chip-icon">📰</span>
+          <span>NPR News Text</span>
+          <span class="chip-desc">Noticias 100% texto</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://old.reddit.com')">
+          <span class="chip-icon">🤖</span>
+          <span>Old Reddit</span>
+          <span class="chip-desc">Interfaz ligera sin React</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://news.ycombinator.com')">
+          <span class="chip-icon">🟧</span>
+          <span>Hacker News</span>
+          <span class="chip-desc">HTML puro sin carga</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://wttr.in')">
+          <span class="chip-icon">🌤️</span>
+          <span>wttr.in</span>
+          <span class="chip-desc">Clima en texto plano</span>
+        </div>
+
+        <div class="chip" onclick="loadURL('https://archive.org')">
+          <span class="chip-icon">🏛️</span>
+          <span>Archive.org</span>
+          <span class="chip-desc">Biblioteca de libros y páginas</span>
+        </div>
+      </div>
+    </div>
+
+    <iframe id="webFrame" src="about:blank" style="display: none;"></iframe>
+  </div>
+
+  <!-- Barra de Estado Atom -->
+  <div class="status-bar">
+    <span id="statusText">Listo</span>
+    <span>Modo Atom: <strong class="status-tag">Zero Animations | Maximum Speed</strong></span>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('urlInput');
+    const webFrame = document.getElementById('webFrame');
+    const homeScreen = document.getElementById('homeScreen');
+    const statusText = document.getElementById('statusText');
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        let query = urlInput.value.trim();
+        if (!query) return;
+
+        if (!query.startsWith('http://') && !query.startsWith('https://')) {
+          if (query.includes('.') && !query.includes(' ')) {
+            query = 'https://' + query;
+          } else {
+            query = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
+          }
+        }
+        loadURL(query);
+      }
+    }
+
+    function loadURL(url) {
+      urlInput.value = url;
+      homeScreen.style.display = 'none';
+      webFrame.style.display = 'block';
+      statusText.textContent = 'Cargando contenido ligero...';
+      webFrame.src = url;
+    }
+
+    function goHome() {
+      webFrame.src = 'about:blank';
+      webFrame.style.display = 'none';
+      homeScreen.style.display = 'flex';
+      urlInput.value = '';
+      statusText.textContent = 'Listo';
+    }
+
+    function reloadFrame() {
+      if (webFrame.style.display !== 'none') {
+        webFrame.src = webFrame.src;
+        statusText.textContent = 'Recargando página...';
+      }
+    }
+
+    function clearRAM() {
+      const currentSrc = webFrame.src;
+      webFrame.src = 'about:blank';
+      
+      if (homeScreen.style.display === 'none') {
+        webFrame.src = currentSrc;
+      }
+      statusText.textContent = '⚡ Memoria DOM limpiada al instante';
+      setTimeout(() => statusText.textContent = 'Listo', 2000);
+    }
+  </script>
+</body>
+</html>
