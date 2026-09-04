@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSC Browser Studio</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-panel: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header Studio */
+    .top-bar {
+      height: 50px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+
+    /* Layout Dividido */
+    .studio-workspace {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 50px);
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .panel:last-child {
+      border-right: none;
+    }
+
+    .panel-header {
+      height: 40px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .btn-save {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-save:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Editor de Código */
+    .code-editor {
+      flex: 1;
+      width: 100%;
+      background: #090d16;
+      color: #38bdf8;
+      border: none;
+      outline: none;
+      padding: 16px;
+      font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: none;
+      tab-size: 2;
+    }
+
+    /* Marco de Resultado */
+    .result-frame {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+      .studio-workspace {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand">
+      🚀 OSC Browser <span>Studio</span>
+    </div>
+    <div class="status-tag" id="statusText">Listo</div>
+  </header>
+
+  <main class="studio-workspace">
+    <!-- Apartado de Código -->
+    <section class="panel">
+      <div class="panel-header">
+        <span>📝 CÓDIGO (HTML / CSS / JS)</span>
+        <button class="btn-save" onclick="manualSave()">💾 Guardar</button>
+      </div>
+      <textarea 
+        id="codeEditor" 
+        class="code-editor" 
+        placeholder="Escribe tu código web aquí..."
+        oninput="handleCodeInput()"
+      ></textarea>
+    </section>
+
+    <!-- Apartado de Resultado -->
+    <section class="panel">
+      <div class="panel-header">
+        <span>👁️ RESULTADO</span>
+      </div>
+      <iframe id="resultFrame" class="result-frame"></iframe>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'osc_studio_saved_code';
+    const editor = document.getElementById('codeEditor');
+    const iframe = document.getElementById('resultFrame');
+    const statusText = document.getElementById('statusText');
+
+    // Plantilla inicial si LocalStorage está vacío
+    const defaultTemplate = `<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0fdf4;
+      color: #166534;
+    }
+    h1 { font-size: 24px; }
+  </style>
+</head>
+<body>
+  <h1>¡OSC Browser Studio está funcionando!</h1>
+</body>
+</html>`;
+
+    // Cargar código al iniciar
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedCode = localStorage.getItem(STORAGE_KEY);
+      if (savedCode !== null) {
+        editor.value = savedCode;
+      } else {
+        editor.value = defaultTemplate;
+      }
+      updatePreview();
+    });
+
+    // Actualizar iframe
+    function updatePreview() {
+      iframe.srcdoc = editor.value;
+    }
+
+    // Manejar escritura (Auto-renderizado y guardado automático secundario)
+    function handleCodeInput() {
+      updatePreview();
+      autoSave();
+    }
+
+    // Guardado en LocalStorage
+    let debounceTimer;
+    function autoSave() {
+      statusText.textContent = "Guardando...";
+      statusText.style.color = "#f59e0b";
+      
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        localStorage.setItem(STORAGE_KEY, editor.value);
+        statusText.textContent = "Cambios guardados en LocalStorage";
+        statusText.style.color = "#10b981";
+      }, 500);
+    }
+
+    // Guardado manual con el botón
+    function manualSave() {
+      clearTimeout(debounceTimer);
+      localStorage.setItem(STORAGE_KEY, editor.value);
+      statusText.textContent = "¡Guardado exitosamente!";
+      statusText.style.color = "#6366f1";
+      setTimeout(() => {
+        statusText.textContent = "Guardado en LocalStorage";
+        statusText.style.color = "#94a3b8";
+      }, 2000);
+    }
+
+    // Permitir tabulaciones con la tecla Tab dentro del editor
+    editor.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 2;
+        handleCodeInput();
+      }
+    });
+  </script>
+</body>
+</html>
