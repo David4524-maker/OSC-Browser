@@ -223,11 +223,10 @@
 <body>
 
   <header>
-    <h1>OSC Browser Helper <span>v2.1</span></h1>
+    <h1>OSC Browser Helper <span>v2.2</span></h1>
     <p>Centro de Ayuda, Documentación y Buscador de Preguntas</p>
   </header>
 
-  <!-- Probador interactivo de RAM -->
   <section class="checker-box">
     <h2>⚡ ¿Corre en mi PC?</h2>
     <div class="input-group">
@@ -237,9 +236,8 @@
     <div id="result"></div>
   </section>
 
-  <!-- Buscador en tiempo real -->
   <div class="search-box">
-    <input type="text" id="faqSearch" placeholder="🔍 Buscar pregunta o palabra clave (ej: RAM, Linux, GitHub, error...)" onkeyup="searchFAQ()">
+    <input type="text" id="faqSearch" placeholder="🔍 Buscar pregunta o palabra clave (ej: OSC, RAM, Linux, GitHub...)" onkeyup="searchFAQ()">
   </div>
 
   <main class="faq-container" id="faqContainer">
@@ -248,7 +246,13 @@
       🚫 No se encontraron preguntas que coincidan con tu búsqueda.
     </div>
 
-    <!-- PREGUNTAS -->
+    <details>
+      <summary>❓ ¿Qué significa OSC?</summary>
+      <div class="content">
+        <p><strong>OSC</strong> significa <strong>Open Source CodePen</strong>.</p>
+      </div>
+    </details>
+
     <details open>
       <summary>📋 Requisitos Mínimos del Sistema</summary>
       <div class="content">
@@ -591,11 +595,11 @@
 
         if (filter === '') {
           details.style.display = '';
-          details.open = false; // Mantiene el estado replegado cuando la búsqueda está vacía
+          details.open = false; // Mantiene el estado replegado
           visibleCount++;
         } else if (questionText.includes(filter) || contentText.includes(filter)) {
           details.style.display = '';
-          details.open = true; // Despliega la respuesta automáticamente si coincide
+          details.open = true; // Despliega la respuesta automáticamente si hay coincidencia
           visibleCount++;
         } else {
           details.style.display = 'none';
@@ -603,7 +607,6 @@
         }
       });
 
-      // Muestra el mensaje de "Sin resultados" si no hay coincidencias
       if (visibleCount === 0 && filter !== '') {
         noResults.style.display = 'block';
       } else {
