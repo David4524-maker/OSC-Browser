@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSC Browser Helper - Centro de Ayuda</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent-green: #3fb950;
+      --text: #c9d1d9;
+      --text-dim: #8b949e;
+      --danger: #f85149;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    header h1 span {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      vertical-align: middle;
+    }
+
+    header p {
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    .checker-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .checker-box h2 {
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"], input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="number"] {
+      width: 160px;
+    }
+
+    .search-box {
+      margin-bottom: 25px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--card);
+      padding: 14px 18px;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+
+    button {
+      background: var(--accent-green);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    details {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      transition: border-color 0.2s;
+    }
+
+    details[open] {
+      border-color: var(--accent);
+    }
+
+    summary {
+      font-weight: bold;
+      font-size: 1.05rem;
+      color: #fff;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "＋";
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+
+    details[open] summary::after {
+      content: "－";
+    }
+
+    .content {
+      margin-top: 10px;
+      color: var(--text);
+      font-size: 0.93rem;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .badge {
+      background: var(--border);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .no-results {
+      display: none;
+      text-align: center;
+      padding: 30px;
+      color: var(--text-dim);
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>OSC Browser Helper <span>v2.1</span></h1>
+    <p>Centro de Ayuda, Documentación y Buscador de Preguntas</p>
+  </header>
+
+  <!-- Probador interactivo de RAM -->
+  <section class="checker-box">
+    <h2>⚡ ¿Corre en mi PC?</h2>
+    <div class="input-group">
+      <input type="number" id="ramInput" placeholder="Cantidad de RAM (MB)" min="1">
+      <button onclick="checkCompatibility()">Verificar Rendimiento</button>
+    </div>
+    <div id="result"></div>
+  </section>
+
+  <!-- Buscador en tiempo real -->
+  <div class="search-box">
+    <input type="text" id="faqSearch" placeholder="🔍 Buscar pregunta o palabra clave (ej: RAM, Linux, GitHub, error...)" onkeyup="searchFAQ()">
+  </div>
+
+  <main class="faq-container" id="faqContainer">
+
+    <div class="no-results" id="noResults">
+      🚫 No se encontraron preguntas que coincidan con tu búsqueda.
+    </div>
+
+    <!-- PREGUNTAS -->
+    <details open>
+      <summary>📋 Requisitos Mínimos del Sistema</summary>
+      <div class="content">
+        <ul>
+          <li><strong>CPU:</strong> 1 núcleo @ 500MHz o superior.</li>
+          <li><strong>RAM:</strong> 64 MB libre (256 MB recomendados para fluidez absoluta).</li>
+          <li><strong>Disco:</strong> 5 MB de espacio disponible.</li>
+          <li><strong>Sistemas:</strong> Windows XP/7/10/11, Linux liviano o VMs de VirtualBox.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔍 ¿Cómo puedo saber mis MB de RAM?</summary>
+      <div class="content">
+        <p>En Windows presiona <span class="badge">Ctrl + Shift + Esc</span> para abrir el Administrador de Tareas y ver la pestaña Rendimiento, o abre <span class="badge">Mem Reduct</span> para monitorear los megabytes exactos en la barra de tareas.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🌐 ¿Qué sitios se pueden acceder?</summary>
+      <div class="content">
+        <p>Está optimizado para archivos locales (<span class="badge">.html</span>, <span class="badge">.ez</span>), visores de componentes, proyectos de CodePen estáticos y páginas ultraligeras en HTML puro.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🚫 ¿Por qué no se puede acceder a Google ni a YouTube?</summary>
+      <div class="content">
+        <p>Porque requieren cientos de MB en scripts, telemetría y reproductores pesados que congelarían computadoras de gama modesta. OSC Browser elimina ese bloatware para garantizar la máxima velocidad local.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🦆 ¿Se puede probar en DuckDuckGo?</summary>
+      <div class="content">
+        <p>Sí, mediante la interfaz ligera <strong>DuckDuckGo Lite</strong> (<span class="badge">html.duckduckgo.com</span>), diseñada para navegadores de bajo consumo sin JavaScript complejo.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🐧 ¿Funciona en Linux?</summary>
+      <div class="content">
+        <p>Sí. Funciona nativamente o sobre capas livianas en distribuciones retro/ligeras como Lubuntu, Puppy Linux o Alpine.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🎯 ¿Para quién está pensado?</summary>
+      <div class="content">
+        <p>Para creadores de interfaces web minimalistas, animadores 2D, usuarios de máquinas virtuales con poca RAM asignada y desarrolladores cansados del consumo excesivo de memoria en navegadores modernos.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📦 ¿Está en GitHub?</summary>
+      <div class="content">
+        <p>Sí, el repositorio vive en GitHub en la rama <span class="badge">main</span> para descargar el proyecto en <span class="badge">.zip</span> en un solo clic.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>💡 ¿En dónde nació OSC Browser?</summary>
+      <div class="content">
+        <p>Nació para erradicar las colgaduras de sistema, pantallas azules al 1% y errores vacíos como <em>"The text could not be generated"</em> en equipos de recursos limitados.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>⚙️ ¿Qué es OSC Engine?</summary>
+      <div class="content">
+        <p>El núcleo interno de renderizado ligero encargado de procesar HTML, CSS y JavaScript local consumiendo el mínimo de procesador.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📜 ¿Es compatible con formatos personalizados o código local?</summary>
+      <div class="content">
+        <p>Soporta componentes SVG, librerías personalizadas y scripts en lenguajes propios como <strong>EZScript</strong> (<span class="badge">.ez</span>).</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>💻 ¿Qué hago si me sale una Pantalla Azul (BSOD)?</summary>
+      <div class="content">
+        <p>Aplica limpieza de memoria RAM con <em>Mem Reduct</em>, apaga VMs secundarias en VirtualBox y reinicia la instancia del navegador.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔋 ¿Consume mucha batería en laptops antiguas?</summary>
+      <div class="content">
+        <p>No. Al no ejecutar rastreadores ni minería de datos en segundo plano, el uso de CPU se mantiene cercano al 0%, alargando la vida de baterías viejas o desgastadas.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🌙 ¿Tiene modo oscuro integrado?</summary>
+      <div class="content">
+        <p>Sí, el tema estándar usa paleta de alto contraste basada en gris oscuro (<span class="badge">#0d1117</span>) para reducir el cansancio visual y el consumo en pantallas OLED/LCD.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>⚛️ ¿Requiere bibliotecas pesadas como React, Vue o Angular?</summary>
+      <div class="content">
+        <p>Para nada. Todo funciona con <strong>Vanilla JS</strong>, HTML5 estándar y CSS3 nativo. Cero dependencias externas en la carpeta <span class="badge">node_modules</span>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📄 ¿Cómo abro un archivo .ez de EZScript?</summary>
+      <div class="content">
+        <p>Solo arrastra el archivo con extensión <span class="badge">.ez</span> a la ventana de OSC Browser o selecciónalo desde la opción de carga local. OSC Engine lo interpretará al instante.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🛡️ ¿Soporta extensiones como AdBlock o uBlock Origin?</summary>
+      <div class="content">
+        <p>No son necesarias. Al no permitir la carga automática de dominios de publicidad externa ni banners pesados, el bloqueo viene integrado a nivel de arquitectura.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📑 ¿Qué pasa si intento abrir 50 pestañas a la vez?</summary>
+      <div class="content">
+        <p>Cada pestaña consume menos de 2 MB de memoria, pero se recomienda moderación en PCs con menos de 128 MB de RAM para evitar usar memoria de intercambio en disco (swapping).</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🕵️‍♂️ ¿Guarda historial de navegación o cookies rastreadoras?</summary>
+      <div class="content">
+        <p>No guarda rastreo de navegación global. Los datos se almacenan de manera local únicamente si el componente utiliza la API de <span class="badge">localStorage</span> del sistema.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔒 ¿Mis datos o archivos locales corren algún riesgo?</summary>
+      <div class="content">
+        <p>Es 100% seguro. Al ser un entorno aislado (*sandbox*) y local-first, ningún script tiene permisos para enviar tu información a servidores remotos.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🎮 ¿Es compatible con gráficos 3D o WebGL?</summary>
+      <div class="content">
+        <p>Soporta Canvas 2D y SVG acelerado por software. No incluye WebGL pesado para no forzar tarjetas gráficas integradas antiguas o controladores obsoletos.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>⚖️ ¿Por qué el proyecto pesa menos de 1 MB?</summary>
+      <div class="content">
+        <p>Porque elimina el motor Chromium entero y aprovecha las APIs nativas del sistema operativo. Sin ejecutables inflados ni redundancia de archivos.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🎨 ¿Puedo personalizar los colores y temas de la interfaz?</summary>
+      <div class="content">
+        <p>Sí, modificando directamente las variables CSS en la regla <span class="badge">:root</span> del archivo principal (<span class="badge">--bg</span>, <span class="badge">--accent</span>, etc.).</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📶 ¿Requiere conexión a Internet para funcionar?</summary>
+      <div class="content">
+        <p>No. Funciona de manera totalmente **Offline**. Es ideal para trabajar en lugares sin señal o en computadoras desconectadas de la red.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🚨 ¿Qué hace OSC Browser cuando la RAM se agota por completo?</summary>
+      <div class="content">
+        <p>Detiene las animaciones secundarias y pausa la ejecución de temporizadores en bucle para prevenir la congelación del sistema operativo.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🧹 ¿Cómo limpio la memoria mientras uso la aplicación?</summary>
+      <div class="content">
+        <p>Puedes presionar el botón de refresco local o ejecutar herramientas externas como <em>Mem Reduct</em> con la combinación de teclas configurada.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📱 ¿Funciona en teléfonos móviles o tablets antiguas?</summary>
+      <div class="content">
+        <p>Es adaptable gracias a su diseño responsivo CSS. Corre dentro de cualquier WebView nativo de sistemas Android clásicos o navegadores móviles ligeros.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔊 ¿Soporta reproducción de audio y efectos de sonido?</summary>
+      <div class="content">
+        <p>Sí. Soporta etiquetas de audio nativas HTML5 (<span class="badge">&lt;audio&gt;</span>) y la Web Audio API para reproducir efectos de sonido o tonos sintetizados en código.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🤖 ¿Por qué no incluye asistentes de voz ni chats de IA integrados?</summary>
+      <div class="content">
+        <p>Porque la IA integrada genera consumo constante de red, memoria y procesador. Priorizamos el rendimiento puro sobre características infladas.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>💾 ¿Cómo se instala sin usar un asistente .exe pesado?</summary>
+      <div class="content">
+        <p>No requiere instalación con registro. Únicamente descarga el archivo <span class="badge">.zip</span> desde la rama <span class="badge">main</span> en GitHub, descomprime la carpeta y abre el archivo principal.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🖥️ ¿Es compatible con sistemas retro como Windows XP o 7?</summary>
+      <div class="content">
+        <p>Totalmente. No utiliza llamadas a librerías de sistemas modernos que causen errores del tipo <em>"DLL no encontrada"</em> en versiones clásicas de Windows.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>📦 ¿Qué rendimiento tiene dentro de VirtualBox?</summary>
+      <div class="content">
+        <p>Excelente. Una máquina virtual con Windows 10/7 asignando únicamente 256 MB de RAM o incluso 128 MB puede ejecutarlo a 60 FPS sin ralentizar la PC anfitriona.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>💡 ¿Puedo correr el componente "Light Switch" aquí?</summary>
+      <div class="content">
+        <p>Sí, fue diseñado originalmente para probar la física de interruptores, ciclos día/noche y efectos parallax SVG sin tirones de cuadros por segundo.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>✏️ ¿Cómo puedo cargar un proyecto exportado de CodePen?</summary>
+      <div class="content">
+        <p>Copia el bloque HTML, CSS y JS unificados dentro de un único archivo <span class="badge">index.html</span> y ábrelo directamente con OSC Browser.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔄 ¿Tiene actualizaciones automáticas que reinicien mi trabajo?</summary>
+      <div class="content">
+        <p>Jamás. Tú tienes el control total sobre cuándo actualizar el código fuente bajando una nueva versión del repositorio.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🎞️ ¿Se pueden visualizar animaciones hechas en FlipAnim?</summary>
+      <div class="content">
+        <p>Sí. Puedes importar los fotogramas exportados como GIFs ligeros o reconstruir la secuencia de imágenes con un script simple en JavaScript.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🕹️ ¿Se pueden ejecutar juegos 2D o retro?</summary>
+      <div class="content">
+        <p>Juegos basados en lógica Canvas 2D ligera (tipo Pong, Snake, Tetris o plataformas de trazo simple) corren de manera óptima sin sobrecargar la memoria.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🔓 ¿El código del proyecto es Open Source?</summary>
+      <div class="content">
+        <p>Sí, es totalmente libre y abierto para que cualquier usuario pueda inspeccionar, modificar o adaptar el código según sus necesidades de hardware.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>⚠️ ¿Qué pasa si mi script entra en un bucle infinito (while true)?</summary>
+      <div class="content">
+        <p>El motor del entorno aísla la pestaña para que puedas cerrarla sin congelar todo el sistema ni forzar el apagado por botón.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🌿 ¿Por qué se utiliza la rama "main" para las descargas?</summary>
+      <div class="content">
+        <p>Para simplificar el acceso a usuarios de todos los niveles: abres el repositorio, das clic en <em>Code -> Download ZIP</em> y tienes el proyecto listo sin aprender comandos Git.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🕶️ ¿Qué define la estética del proyecto?</summary>
+      <div class="content">
+        <p>La combinación de un diseño minimalista, contraste oscuro tipo terminal, tarjetas con bordes definidos e información clara orientada a la velocidad.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>🛠️ ¿Cómo puedo sugerir cambios o enviar mejoras a OSC Engine?</summary>
+      <div class="content">
+        <p>Puedes abrir un <em>Issue</em> o enviar un <em>Pull Request</em> en el repositorio oficial de GitHub proponiendo optimizaciones de código o nuevas funciones ligeras.</p>
+      </div>
+    </details>
+
+  </main>
+
+  <footer>
+    <p>OSC Browser Helper • Diseñado para alto rendimiento y bajo consumo • 2026</p>
+  </footer>
+
+  <script>
+    /* Calculadora de RAM */
+    function checkCompatibility() {
+      const ram = parseInt(document.getElementById('ramInput').value);
+      const resultDiv = document.getElementById('result');
+
+      if (isNaN(ram) || ram <= 0) {
+        resultDiv.style.color = "var(--danger)";
+        resultDiv.innerHTML = "❌ Ingresa una cantidad válida de RAM en MB.";
+        return;
+      }
+
+      if (ram < 64) {
+        resultDiv.style.color = "var(--danger)";
+        resultDiv.innerHTML = `⚠️ Con ${ram}MB vas a ver la pantalla azul del <i>"The text could not be generated"</i> 🤡 (HUMOR XD). ¡Asigna al menos 64MB!`;
+      } else if (ram >= 64 && ram <= 512) {
+        resultDiv.style.color = "var(--accent-green)";
+        resultDiv.innerHTML = `🚀 ¡PERFECTO! Con ${ram}MB OSC Browser y OSC Engine correrán al 100% sin esfuerzo.`;
+      } else {
+        resultDiv.style.color = "var(--accent)";
+        resultDiv.innerHTML = `🔥 Tienes ${ram}MB (${(ram/1024).toFixed(1)}GB). ¡Súper sobrado! Tienes RAM suficiente para jugar juegos ligeros mientras usas el navegador.`;
+      }
+    }
+
+    /* Buscador de FAQ en Tiempo Real */
+    function searchFAQ() {
+      const filter = document.getElementById('faqSearch').value.toLowerCase().trim();
+      const detailsElements = document.querySelectorAll('#faqContainer details');
+      const noResults = document.getElementById('noResults');
+      let visibleCount = 0;
+
+      detailsElements.forEach(details => {
+        const questionText = details.querySelector('summary').textContent.toLowerCase();
+        const contentText = details.querySelector('.content').textContent.toLowerCase();
+
+        if (filter === '') {
+          details.style.display = '';
+          details.open = false; // Mantiene el estado replegado cuando la búsqueda está vacía
+          visibleCount++;
+        } else if (questionText.includes(filter) || contentText.includes(filter)) {
+          details.style.display = '';
+          details.open = true; // Despliega la respuesta automáticamente si coincide
+          visibleCount++;
+        } else {
+          details.style.display = 'none';
+          details.open = false;
+        }
+      });
+
+      // Muestra el mensaje de "Sin resultados" si no hay coincidencias
+      if (visibleCount === 0 && filter !== '') {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
