@@ -458,9 +458,7 @@
     }
   </style>
 
-  <!-- ============================================================
-       ESTILOS DEL MODO INCÓGNITO (bloque nuevo, no toca lo anterior)
-  ============================================================= -->
+  <!-- ESTILOS DEL MODO INCÓGNITO -->
   <style id="incognito-styles">
     #incognito-tab-btn {
       background: transparent;
@@ -589,6 +587,7 @@
          <div class="shortcut" onclick="openUrl('https://www.google.com')">Google</div>
          <div class="shortcut" onclick="openUrl('https://www.wikipedia.org')">Wiki</div>
          <div class="shortcut" onclick="openUrl('https://www.youtube.com')">YT</div>
+         <div class="shortcut" onclick="openUrl('osc://parkourgame')" style="border-color:#10b981; color:#10b981;">🏃 Juego</div>
       </div>
 
       <!-- Sección de Webs Guardadas -->
@@ -1021,36 +1020,286 @@
       return { status: 'safe', reason: '' };
     }
 
-    function generateBlockedPageHTML(targetUrl, reason) {
+    function generateParkourGameHTML(headerText = 'Plataforma de Parkour Minimalista 🏃', reasonText = 'Usa A/D o Flechas para moverte | Espacio, W o Arriba para Saltar') {
       return `
         <!DOCTYPE html>
         <html>
         <head>
+          <meta charset="UTF-8">
           <style>
-            body { font-family: sans-serif; background: #0c0f17; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-            .card { background: #1a2234; border: 2px solid #ef4444; border-radius: 16px; padding: 40px; max-width: 480px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); }
-            .icon { font-size: 60px; margin-bottom: 10px; }
-            h2 { color: #ef4444; margin: 0 0 12px 0; }
-            p { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-            .url-display { background: #0c0f17; padding: 8px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #fca5a5; word-break: break-all; margin-bottom: 20px; }
-            button { background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+            body { 
+              font-family: sans-serif; 
+              background: #0c0f17; 
+              color: white; 
+              display: flex; 
+              flex-direction: column;
+              justify-content: center; 
+              align-items: center; 
+              height: 100vh; 
+              margin: 0; 
+              text-align: center; 
+              overflow: hidden;
+            }
+            .header-text { 
+              color: #10b981; 
+              font-size: 20px; 
+              font-weight: bold; 
+              margin-bottom: 6px;
+              text-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+            }
+            .reason-text {
+              color: #cbd5e1;
+              font-size: 12px;
+              margin-bottom: 12px;
+            }
+            canvas {
+              background: #111827;
+              border: 2px solid #3b82f6;
+              border-radius: 12px;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            }
+            .controls-info {
+              font-size: 11px;
+              color: #94a3b8;
+              margin-top: 8px;
+            }
+            button { 
+              margin-top: 10px;
+              background: #334155; 
+              color: white; 
+              border: none; 
+              padding: 8px 16px; 
+              border-radius: 8px; 
+              font-weight: bold; 
+              cursor: pointer; 
+              transition: background 0.2s; 
+            }
             button:hover { background: #475569; }
           </style>
         </head>
         <body>
-          <div class="card">
-            <div class="icon">🛑</div>
-            <h2>Acceso / Elemento Bloqueado</h2>
-            <div class="url-display">${targetUrl}</div>
-            <p>${reason}</p>
-            <button onclick="window.parent.goHome()">Volver al Inicio Seguro 🏠</button>
-          </div>
+          <div class="header-text">${headerText}</div>
+          <div class="reason-text">${reasonText}</div>
+          <canvas id="gameCanvas" width="650" height="300"></canvas>
+          <div class="controls-info">Controles: ← → / A D (Mover) | ESPACIO / ↑ / W (Salta)</div>
+          <button onclick="window.parent.goHome()">Volver al Inicio Seguro 🏠</button>
+
+          <script>
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let level = 1;
+            let gameOver = false;
+            let levelComplete = false;
+
+            let keys = { left: false, right: false, up: false };
+
+            let player = {
+              x: 30,
+              y: 200,
+              width: 22,
+              height: 22,
+              velocityX: 0,
+              velocityY: 0,
+              speed: 3.8,
+              gravity: 0.5,
+              jumpPower: -9.5,
+              isGrounded: false
+            };
+
+            let goal = { x: 580, y: 50, width: 25, height: 35 };
+
+            let platforms = [];
+
+            function generatePlatforms() {
+              platforms = [];
+              // Suelo de inicio
+              platforms.push({ x: 20, y: 260, width: 100, height: 15 });
+
+              if (level === 1) {
+                platforms.push({ x: 150, y: 220, width: 80, height: 15 });
+                platforms.push({ x: 270, y: 180, width: 80, height: 15 });
+                platforms.push({ x: 390, y: 140, width: 80, height: 15 });
+                platforms.push({ x: 520, y: 100, width: 100, height: 15 });
+              } else if (level === 2) {
+                platforms.push({ x: 140, y: 230, width: 60, height: 15 });
+                platforms.push({ x: 240, y: 190, width: 50, height: 15 });
+                platforms.push({ x: 340, y: 150, width: 50, height: 15 });
+                platforms.push({ x: 450, y: 120, width: 60, height: 15 });
+                platforms.push({ x: 550, y: 90, width: 80, height: 15 });
+              } else {
+                // Generación procedimental según nivel
+                let lastX = 130;
+                let lastY = 230;
+                for (let i = 0; i < 5; i++) {
+                  let width = Math.max(35, 70 - level * 3);
+                  let gapX = Math.floor(Math.random() * 30) + 75;
+                  let gapY = Math.floor(Math.random() * 40) - 20;
+                  
+                  lastX += gapX;
+                  lastY = Math.max(80, Math.min(250, lastY + gapY));
+                  
+                  if (lastX > canvas.width - 100) break;
+                  platforms.push({ x: lastX, y: lastY, width: width, height: 15 });
+                }
+                // Plataforma final
+                goal.x = Math.min(canvas.width - 50, lastX + 80);
+                goal.y = Math.max(50, lastY - 40);
+                platforms.push({ x: goal.x - 10, y: goal.y + 35, width: 70, height: 15 });
+              }
+            }
+
+            function resetPlayer() {
+              player.x = 30;
+              player.y = 200;
+              player.velocityX = 0;
+              player.velocityY = 0;
+              player.isGrounded = false;
+            }
+
+            function resetGame() {
+              level = 1;
+              gameOver = false;
+              levelComplete = false;
+              generatePlatforms();
+              resetPlayer();
+              animate();
+            }
+
+            window.addEventListener('keydown', (e) => {
+              if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+              if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+              if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                if (gameOver) {
+                  resetGame();
+                  return;
+                }
+                if (player.isGrounded) {
+                  player.velocityY = player.jumpPower;
+                  player.isGrounded = false;
+                }
+              }
+            });
+
+            window.addEventListener('keyup', (e) => {
+              if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+              if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            });
+
+            function animate() {
+              if (gameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('¡CAÍSTE AL VACÍO!', canvas.width / 2, canvas.height / 2 - 10);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('Nivel alcanzado: ' + level + ' | Presiona Espacio para Reiniciar', canvas.width / 2, canvas.height / 2 + 20);
+                return;
+              }
+
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+              // Controles horizontales
+              if (keys.left) player.velocityX = -player.speed;
+              else if (keys.right) player.velocityX = player.speed;
+              else player.velocityX = 0;
+
+              // Gravedad
+              player.velocityY += player.gravity;
+
+              // Movimiento
+              player.x += player.velocityX;
+              player.y += player.velocityY;
+
+              // Límites laterales de la pantalla
+              if (player.x < 0) player.x = 0;
+              if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+              // Caída al vacío (Game Over)
+              if (player.y > canvas.height) {
+                gameOver = true;
+              }
+
+              // Colisiones con Plataformas
+              player.isGrounded = false;
+              for (let plat of platforms) {
+                if (
+                  player.x + player.width > plat.x &&
+                  player.x < plat.x + plat.width &&
+                  player.y + player.height >= plat.y &&
+                  player.y + player.height <= plat.y + plat.height + player.velocityY &&
+                  player.velocityY >= 0
+                ) {
+                  player.y = plat.y - player.height;
+                  player.velocityY = 0;
+                  player.isGrounded = true;
+                }
+              }
+
+              // Detección de Llegada a la Meta (🏁)
+              if (
+                player.x < goal.x + goal.width &&
+                player.x + player.width > goal.x &&
+                player.y < goal.y + goal.height &&
+                player.y + player.height > goal.y
+              ) {
+                level++;
+                generatePlatforms();
+                resetPlayer();
+              }
+
+              // Dibujar Plataformas
+              ctx.fillStyle = '#334155';
+              ctx.strokeStyle = '#3b82f6';
+              ctx.lineWidth = 2;
+              for (let plat of platforms) {
+                ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+                ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
+              }
+
+              // Dibujar Meta / Portal (🏁)
+              ctx.fillStyle = '#f59e0b';
+              ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
+              ctx.fillStyle = '#ffffff';
+              ctx.font = '16px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillText('🏁', goal.x + goal.width / 2, goal.y + 22);
+
+              // Dibujar Jugador (Cubo Verde de Parkour)
+              ctx.fillStyle = '#10b981';
+              ctx.fillRect(player.x, player.y, player.width, player.height);
+              ctx.strokeStyle = '#6ee7b7';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(player.x, player.y, player.width, player.height);
+
+              // UI Nivel
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 14px sans-serif';
+              ctx.textAlign = 'left';
+              ctx.fillText('Nivel Parkour: ' + level, 15, 25);
+
+              requestAnimationFrame(animate);
+            }
+
+            generatePlatforms();
+            animate();
+          <\/script>
         </body>
         </html>
       `;
     }
 
-    /* === MENEJO DE PRIMERA VISITA / BIENVENIDA === */
+    function generateBlockedPageHTML(targetUrl, reason) {
+      return generateParkourGameHTML(
+        'No se puede acceder a la web, pero puedes jugar este minijuego',
+        reason
+      );
+    }
+
+    /* === MANEJO DE PRIMERA VISITA / BIENVENIDA === */
     function checkFirstVisit() {
       const welcomeSeen = localStorage.getItem('ocs_welcome_seen');
       if (!welcomeSeen) {
@@ -1187,6 +1436,13 @@
         tab.iframeEl.style.display = 'none';
         urlInput.value = '';
         updateSecurityBadge('safe', 'Página de inicio protegida.');
+      } else if (state.type === 'game') {
+        homeScreen.style.display = 'none';
+        tab.iframeEl.removeAttribute('src');
+        tab.iframeEl.srcdoc = generateParkourGameHTML('Plataforma de Parkour OCS 🏃', 'A/D o Flechas (Mover) | Espacio/Arriba/W (Saltar)');
+        tab.iframeEl.style.display = 'block';
+        urlInput.value = state.url;
+        updateSecurityBadge('safe', 'Modo Juego Local OCS.');
       } else if (state.type === 'osc') {
         homeScreen.style.display = 'none';
         tab.iframeEl.removeAttribute('src');
@@ -1365,6 +1621,7 @@
     }
 
     function getEmojiForUrl(url) {
+      if (url.includes('parkourgame')) return '🏃';
       if (url.includes('wikipedia')) return '📚';
       if (url.includes('youtube')) return '▶️';
       if (url.includes('google')) return '🌐';
@@ -1454,7 +1711,13 @@
       const trimmed = input.trim();
       let newState = {};
 
-      if (/^https?:\/\//i.test(trimmed)) {
+      if (trimmed.toLowerCase() === 'osc://parkourgame') {
+        newState = {
+          type: 'game',
+          url: 'osc://parkourgame',
+          title: '🏃 Minijuego Parkour'
+        };
+      } else if (/^https?:\/\//i.test(trimmed)) {
         newState = { type: 'web', url: trimmed, title: getDomainOrQuery(input, trimmed) };
       } else if (!trimmed.includes(' ') && trimmed.includes('.')) {
         const fullUrl = 'https://' + trimmed;
@@ -1598,11 +1861,7 @@
     loadSettings();
   </script>
 
-  <!-- ============================================================
-       LÓGICA DEL MODO INCÓGNITO (script nuevo y separado; no
-       modifica ni elimina ninguna línea del script anterior, solo
-       reutiliza sus variables y funciones ya existentes)
-  ============================================================= -->
+  <!-- LÓGICA DEL MODO INCÓGNITO -->
   <script id="incognito-mode-script">
     (function () {
       'use strict';
@@ -1621,8 +1880,6 @@
       };
       function t() { return incognitoText[currentLang] || incognitoText.es; }
 
-      // Crea una pestaña de incógnito reutilizando tal cual la función
-      // createNewTab() ya existente (no se toca ni se duplica su lógica).
       window.createIncognitoTab = function (input) {
         createNewTab(input || '');
         const tab = tabs.find(x => x.id === activeTabId);
@@ -1656,18 +1913,8 @@
         }
       }
 
-      // Varias funciones ya existentes (cambiar de pestaña, cerrar
-      // pestaña, navegar, cambiar idioma) vuelven a dibujar las pestañas
-      // por su cuenta. En vez de tocar esas funciones, revisamos el
-      // estado cada poco tiempo para mantener sincronizados el color
-      // morado y el banner, sin modificar ni una línea de ellas.
       setInterval(actualizarUiIncognito, 250);
 
-      // Si la pestaña activa es de incógnito, bloquea el guardado de
-      // webs. Usamos un listener en 'document' (fase de burbuja), que
-      // siempre se ejecuta despues del click en el botón: deja que
-      // abra el modal original y, en el mismo evento (antes de pintar
-      // el siguiente cuadro), lo vuelve a cerrar y avisa al usuario.
       document.addEventListener('click', function (e) {
         if (e.target && e.target.closest && e.target.closest('#btn-install')) {
           if (activeEsIncognito()) {
