@@ -471,26 +471,26 @@
     }
     #incognito-tab-btn:hover { background: #2e1065; }
 
-    body.incognito-mode #nav-bar { background: #180a2e; border-bottom-color: #7c3aed; }
-    body.incognito-mode #tabs-bar { background: #100620; }
-    body.incognito-mode .url-container { border-color: #7c3aed; }
+    body.incognito-mode #nav-bar { background: #27272a; border-bottom-color: #52525b; }
+    body.incognito-mode #tabs-bar { background: #18181b; }
+    body.incognito-mode .url-container { border-color: #52525b; background: #09090b; }
 
-    .tab.tab-incognito { background: #241141; border-color: #5b21b6; }
-    .tab.tab-incognito.active { border-top-color: #a78bfa; }
+    .tab.tab-incognito { background: #27272a; border-color: #52525b; color: #d4d4d8; }
+    .tab.tab-incognito.active { border-top-color: #a1a1aa; background: #3f3f46; color: #ffffff; }
 
     .incognito-banner {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      background: #2e1065;
-      color: #ede9fe;
+      background: #27272a;
+      color: #f4f4f5;
       padding: 7px 18px;
       border-radius: 20px;
       font-size: 12px;
       z-index: 25;
       display: none;
-      border: 1px solid #7c3aed;
+      border: 1px solid #52525b;
       box-shadow: 0 4px 14px rgba(0,0,0,0.5);
       pointer-events: none;
       max-width: 90%;
@@ -850,6 +850,69 @@
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
 
+    /* Generación de pantalla gris para el modo incógnito */
+    function generateIncognitoHomeHTML() {
+      return `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              margin: 0;
+              height: 100vh;
+              background-color: #2d3748;
+              color: #f7fafc;
+              font-family: system-ui, -apple-system, sans-serif;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              text-align: center;
+              padding: 20px;
+              box-sizing: border-box;
+            }
+            .card {
+              background: #1a202c;
+              border: 1px solid #4a5568;
+              border-radius: 16px;
+              padding: 40px 30px;
+              max-width: 520px;
+              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { margin: 0 0 16px 0; font-size: 24px; color: #edf2f7; }
+            p { font-size: 16px; color: #cbd5e0; line-height: 1.5; margin: 0 0 24px 0; }
+            ul {
+              text-align: left;
+              background: #2d3748;
+              padding: 16px 20px 16px 36px;
+              border-radius: 10px;
+              font-size: 13px;
+              color: #a0aec0;
+              margin: 0;
+            }
+            li { margin-bottom: 8px; }
+            li:last-child { margin-bottom: 0; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">🕵️</div>
+            <h1>Modo Incógnito Privado</h1>
+            <p>Estas en modo incognito, aqui no se guardan cookies ni un solo historial</p>
+            <ul>
+              <li>🚫 <b>Cookies y almacenamiento web:</b> Totalmente desactivados.</li>
+              <li>🚫 <b>Historial de navegación:</b> No se registra ninguna actividad.</li>
+              <li>🔒 <b>Inicio de sesión:</b> Deshabilitado por protección de privacidad.</li>
+              <li>💾 <b>Webs guardadas:</b> Bloqueadas en modo privado.</li>
+            </ul>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
     /* PWA Prompt */
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -1113,7 +1176,6 @@
 
             function generatePlatforms() {
               platforms = [];
-              // Suelo de inicio
               platforms.push({ x: 20, y: 260, width: 100, height: 15 });
 
               if (level === 1) {
@@ -1128,7 +1190,6 @@
                 platforms.push({ x: 450, y: 120, width: 60, height: 15 });
                 platforms.push({ x: 550, y: 90, width: 80, height: 15 });
               } else {
-                // Generación procedimental según nivel
                 let lastX = 130;
                 let lastY = 230;
                 for (let i = 0; i < 5; i++) {
@@ -1142,7 +1203,6 @@
                   if (lastX > canvas.width - 100) break;
                   platforms.push({ x: lastX, y: lastY, width: width, height: 15 });
                 }
-                // Plataforma final
                 goal.x = Math.min(canvas.width - 50, lastX + 80);
                 goal.y = Math.max(50, lastY - 40);
                 platforms.push({ x: goal.x - 10, y: goal.y + 35, width: 70, height: 15 });
@@ -1202,28 +1262,22 @@
 
               ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-              // Controles horizontales
               if (keys.left) player.velocityX = -player.speed;
               else if (keys.right) player.velocityX = player.speed;
               else player.velocityX = 0;
 
-              // Gravedad
               player.velocityY += player.gravity;
 
-              // Movimiento
               player.x += player.velocityX;
               player.y += player.velocityY;
 
-              // Límites laterales de la pantalla
               if (player.x < 0) player.x = 0;
               if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-              // Caída al vacío (Game Over)
               if (player.y > canvas.height) {
                 gameOver = true;
               }
 
-              // Colisiones con Plataformas
               player.isGrounded = false;
               for (let plat of platforms) {
                 if (
@@ -1239,7 +1293,6 @@
                 }
               }
 
-              // Detección de Llegada a la Meta (🏁)
               if (
                 player.x < goal.x + goal.width &&
                 player.x + player.width > goal.x &&
@@ -1251,7 +1304,6 @@
                 resetPlayer();
               }
 
-              // Dibujar Plataformas
               ctx.fillStyle = '#334155';
               ctx.strokeStyle = '#3b82f6';
               ctx.lineWidth = 2;
@@ -1260,7 +1312,6 @@
                 ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
               }
 
-              // Dibujar Meta / Portal (🏁)
               ctx.fillStyle = '#f59e0b';
               ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
               ctx.fillStyle = '#ffffff';
@@ -1268,14 +1319,12 @@
               ctx.textAlign = 'center';
               ctx.fillText('🏁', goal.x + goal.width / 2, goal.y + 22);
 
-              // Dibujar Jugador (Cubo Verde de Parkour)
               ctx.fillStyle = '#10b981';
               ctx.fillRect(player.x, player.y, player.width, player.height);
               ctx.strokeStyle = '#6ee7b7';
               ctx.lineWidth = 2;
               ctx.strokeRect(player.x, player.y, player.width, player.height);
 
-              // UI Nivel
               ctx.fillStyle = '#ffffff';
               ctx.font = 'bold 14px sans-serif';
               ctx.textAlign = 'left';
@@ -1363,7 +1412,7 @@
       changeSearchEngine(currentEngine);
 
       tabs.forEach(tab => {
-        if (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault) {
+        if (!tab.isCustomTitle && (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault)) {
           tab.title = t.newTabDefault;
         }
       });
@@ -1399,9 +1448,11 @@
         id: id,
         url: '',
         title: translations[currentLang].newTabDefault,
+        isCustomTitle: false,
         iframeEl: iframe,
         history: [defaultHomeState],
-        historyIndex: 0
+        historyIndex: 0,
+        incognito: false
       };
 
       tabs.push(tabObj);
@@ -1429,13 +1480,31 @@
     /* Manejo del Historial y Navegación con Filtro de Seguridad */
     function loadHistoryState(tab, state) {
       tab.url = state.url;
-      tab.title = state.title;
+      if (!tab.isCustomTitle) {
+        tab.title = state.title;
+      }
+
+      // Si es una pestaña de incógnito, se aplica aislamiento de cookies y sesiones
+      if (tab.incognito) {
+        tab.iframeEl.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups');
+      } else {
+        tab.iframeEl.removeAttribute('sandbox');
+      }
 
       if (state.type === 'home' || !state.url) {
-        homeScreen.style.display = 'flex';
-        tab.iframeEl.style.display = 'none';
-        urlInput.value = '';
-        updateSecurityBadge('safe', 'Página de inicio protegida.');
+        if (tab.incognito) {
+          homeScreen.style.display = 'none';
+          tab.iframeEl.removeAttribute('src');
+          tab.iframeEl.srcdoc = generateIncognitoHomeHTML();
+          tab.iframeEl.style.display = 'block';
+          urlInput.value = '';
+          updateSecurityBadge('safe', 'Estas en modo incognito, aqui no se guardan cookies ni un solo historial');
+        } else {
+          homeScreen.style.display = 'flex';
+          tab.iframeEl.style.display = 'none';
+          urlInput.value = '';
+          updateSecurityBadge('safe', 'Página de inicio protegida.');
+        }
       } else if (state.type === 'game') {
         homeScreen.style.display = 'none';
         tab.iframeEl.removeAttribute('src');
@@ -1451,7 +1520,6 @@
         urlInput.value = state.url;
         updateSecurityBadge('safe', 'Motor OSC Search seguro (Sin Anuncios).');
       } else {
-        // Evaluación de Seguridad y AdBlock
         const secEval = evaluateUrlSecurity(state.url);
         updateSecurityBadge(secEval.status, secEval.reason);
 
@@ -1525,16 +1593,32 @@
       }
     }
 
+    function renameTab(id, event) {
+      if (event) event.stopPropagation();
+      const tab = tabs.find(t => t.id === id);
+      if (!tab) return;
+
+      const newTitle = prompt("Escribe el nuevo nombre de la pestaña:", tab.title);
+      if (newTitle !== null && newTitle.trim() !== "") {
+        tab.title = newTitle.trim();
+        tab.isCustomTitle = true;
+        renderTabs();
+      }
+    }
+
     function renderTabs() {
       tabsContainer.innerHTML = '';
       tabs.forEach(tab => {
         const tabEl = document.createElement('div');
         tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
+        if (tab.incognito) tabEl.classList.add('tab-incognito');
         tabEl.onclick = () => switchTab(tab.id);
 
         const titleEl = document.createElement('span');
         titleEl.className = 'tab-title';
         titleEl.textContent = tab.title;
+        titleEl.title = "Haz doble clic para renombrar esta pestaña";
+        titleEl.ondblclick = (e) => renameTab(tab.id, e);
 
         const closeBtn = document.createElement('span');
         closeBtn.className = 'close-tab';
@@ -1550,6 +1634,11 @@
     /* SISTEMA DE WEBS GUARDADAS */
     function openInstallModal() {
       const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.incognito) {
+        alert("No puedes guardar webs mientras navegas en modo incógnito.");
+        return;
+      }
+
       const nameInput = document.getElementById('app-name-input');
       const urlInputModal = document.getElementById('app-url-input');
       const iconInput = document.getElementById('app-icon-input');
@@ -1575,6 +1664,13 @@
     }
 
     function saveInstalledApp() {
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab && activeTab.incognito) {
+        alert("No se pueden guardar webs en modo incógnito.");
+        closeInstallModal();
+        return;
+      }
+
       const name = document.getElementById('app-name-input').value.trim();
       const url = document.getElementById('app-url-input').value.trim();
       const icon = document.getElementById('app-icon-input').value.trim() || '🌐';
@@ -1768,7 +1864,7 @@
         const homeState = {
           type: 'home',
           url: '',
-          title: translations[currentLang].newTabDefault
+          title: activeTab.incognito ? '🕵️ Incógnito' : translations[currentLang].newTabDefault
         };
 
         activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
@@ -1869,12 +1965,12 @@
       const incognitoText = {
         es: {
           tabTitle: '🕵️ Incógnito',
-          banner: '🕵️ Estás en una pestaña de incógnito: al cerrarla no queda ningún rastro y no puedes guardar webs.',
+          banner: '🕵️ Estás en modo incógnito: no se guardan cookies, no se guarda historial y no se puede iniciar sesión.',
           saveBlocked: 'No puedes guardar webs mientras navegas en modo incógnito.'
         },
         en: {
           tabTitle: '🕵️ Incognito',
-          banner: "🕵️ You're in an incognito tab: closing it leaves no trace and you can't save websites.",
+          banner: "🕵️ You're in incognito mode: cookies, history, and logins are completely disabled.",
           saveBlocked: "You can't save websites while browsing in incognito mode."
         }
       };
@@ -1887,6 +1983,7 @@
           tab.incognito = true;
           tab.title = t().tabTitle;
           if (tab.history && tab.history[0]) tab.history[0].title = t().tabTitle;
+          loadHistoryState(tab, tab.history[tab.historyIndex]);
         }
         renderTabs();
         actualizarUiIncognito();
@@ -1903,6 +2000,12 @@
 
         const banner = document.getElementById('incognito-banner');
         if (banner) banner.textContent = t().banner;
+
+        const installBtn = document.getElementById('btn-install');
+        if (installBtn) {
+          installBtn.disabled = activa;
+          installBtn.title = activa ? t().saveBlocked : (translations[currentLang]?.installAppTitle || 'Guardar web');
+        }
 
         if (typeof tabsContainer !== 'undefined' && tabsContainer) {
           const nodos = tabsContainer.children;
@@ -1922,7 +2025,7 @@
             alert(t().saveBlocked);
           }
         }
-      }, false);
+      }, true);
 
       actualizarUiIncognito();
     })();
