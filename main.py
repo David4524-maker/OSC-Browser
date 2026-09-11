@@ -1536,7 +1536,8 @@ HTML_CODE = """<!DOCTYPE html>
         iframeEl: iframe,
         history: [defaultHomeState],
         historyIndex: 0,
-        incognito: false
+        incognito: false,
+        loadedIndex: -1
       };
 
       tabs.push(tabObj);
@@ -1562,7 +1563,7 @@ HTML_CODE = """<!DOCTYPE html>
     }
 
     /* Manejo del Historial y Navegación con Filtro de Seguridad */
-    function loadHistoryState(tab, state) {
+    function loadHistoryState(tab, state, forceReload = false) {
       tab.url = state.url;
       if (!tab.isCustomTitle) {
         tab.title = state.title;
@@ -1575,11 +1576,15 @@ HTML_CODE = """<!DOCTYPE html>
         tab.iframeEl.removeAttribute('sandbox');
       }
 
+      const isAlreadyLoaded = (tab.loadedIndex === tab.historyIndex) && !forceReload;
+
       if (state.type === 'home' || !state.url) {
         if (tab.incognito) {
           homeScreen.style.display = 'none';
-          tab.iframeEl.removeAttribute('src');
-          tab.iframeEl.srcdoc = generateIncognitoHomeHTML();
+          if (!isAlreadyLoaded) {
+            tab.iframeEl.removeAttribute('src');
+            tab.iframeEl.srcdoc = generateIncognitoHomeHTML();
+          }
           tab.iframeEl.style.display = 'block';
           urlInput.value = '';
           updateSecurityBadge('safe', 'Estas en modo incognito, aqui no se guardan cookies ni un solo historial');
@@ -1591,15 +1596,19 @@ HTML_CODE = """<!DOCTYPE html>
         }
       } else if (state.type === 'game') {
         homeScreen.style.display = 'none';
-        tab.iframeEl.removeAttribute('src');
-        tab.iframeEl.srcdoc = generateParkourGameHTML('Plataforma de Parkour OCS 🏃', 'A/D o Flechas (Mover) | Espacio/Arriba/W (Saltar)');
+        if (!isAlreadyLoaded) {
+          tab.iframeEl.removeAttribute('src');
+          tab.iframeEl.srcdoc = generateParkourGameHTML('Plataforma de Parkour OCS 🏃', 'A/D o Flechas (Mover) | Espacio/Arriba/W (Saltar)');
+        }
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
         updateSecurityBadge('safe', 'Modo Juego Local OCS.');
       } else if (state.type === 'osc') {
         homeScreen.style.display = 'none';
-        tab.iframeEl.removeAttribute('src');
-        tab.iframeEl.srcdoc = generateOscSearchHTML(state.query);
+        if (!isAlreadyLoaded) {
+          tab.iframeEl.removeAttribute('src');
+          tab.iframeEl.srcdoc = generateOscSearchHTML(state.query);
+        }
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
         updateSecurityBadge('safe', 'Motor OSC Search seguro (Sin Anuncios).');
@@ -1609,17 +1618,21 @@ HTML_CODE = """<!DOCTYPE html>
 
         homeScreen.style.display = 'none';
 
-        if (secEval.status === 'danger') {
-          tab.iframeEl.removeAttribute('src');
-          tab.iframeEl.srcdoc = generateBlockedPageHTML(state.url, secEval.reason);
-        } else {
-          tab.iframeEl.removeAttribute('srcdoc');
-          tab.iframeEl.src = PROXY_PREFIX + encodeURIComponent(state.url);
+        if (!isAlreadyLoaded) {
+          if (secEval.status === 'danger') {
+            tab.iframeEl.removeAttribute('src');
+            tab.iframeEl.srcdoc = generateBlockedPageHTML(state.url, secEval.reason);
+          } else {
+            tab.iframeEl.removeAttribute('srcdoc');
+            tab.iframeEl.src = PROXY_PREFIX + encodeURIComponent(state.url);
+          }
         }
 
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
       }
+
+      tab.loadedIndex = tab.historyIndex;
     }
 
     function goBack() {
@@ -1935,7 +1948,7 @@ HTML_CODE = """<!DOCTYPE html>
     function reloadTab() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && activeTab.url) {
-        loadHistoryState(activeTab, activeTab.history[activeTab.historyIndex]);
+        loadHistoryState(activeTab, activeTab.history[activeTab.historyIndex], true);
       }
     }
 
@@ -2067,7 +2080,7 @@ HTML_CODE = """<!DOCTYPE html>
           tab.incognito = true;
           tab.title = t().tabTitle;
           if (tab.history && tab.history[0]) tab.history[0].title = t().tabTitle;
-          loadHistoryState(tab, tab.history[tab.historyIndex]);
+          loadHistoryState(tab, tab.history[tab.historyIndex], true);
         }
         renderTabs();
         actualizarUiIncognito();
