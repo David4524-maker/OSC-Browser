@@ -22,7 +22,6 @@
       flex-direction: column; 
     }
 
-    /* Barra Superior de Pestañas */
     #tabs-bar {
       background: var(--bg-dark);
       display: flex;
@@ -94,7 +93,6 @@
       background: var(--menu-bg);
     }
     
-    /* Barra Superior de Navegación */
     #nav-bar { 
       background: var(--menu-bg); 
       padding: 8px 12px; 
@@ -163,13 +161,11 @@
       cursor: not-allowed;
     }
 
-    /* Área de Contenido Principal */
     #content-area {
       flex: 1;
       position: relative;
     }
 
-    /* Pantalla Principal (Home) */
     #home-screen { 
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -187,7 +183,6 @@
       transition: background-image 0.3s ease-in-out;
     }
 
-    /* Panel de Ajustes Visuales */
     .color-settings {
       position: absolute;
       top: 15px;
@@ -246,7 +241,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Menú y Caja de Búsqueda Integrada */
     .search-container {
       display: flex;
       align-items: center;
@@ -307,7 +301,6 @@
       transform: translateY(-3px);
     }
 
-    /* Sección de Webs Guardadas */
     #installed-apps-section {
       width: 100%;
       max-width: 600px;
@@ -375,7 +368,6 @@
       display: flex;
     }
 
-    /* Modales Generales */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -417,7 +409,6 @@
     }
     .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 
-    /* Modal de Bienvenida */
     .welcome-box {
       background: var(--menu-bg);
       border: 2px solid var(--accent-color);
@@ -458,7 +449,6 @@
     }
   </style>
 
-  <!-- ESTILOS DEL MODO INCÓGNITO -->
   <style id="incognito-styles">
     #incognito-tab-btn {
       background: transparent;
@@ -503,28 +493,27 @@
 
   <div id="tabs-bar">
     <div id="tabs-container" style="display:flex; gap:4px;"></div>
-    <button class="add-tab-btn" onclick="createNewTab()" title="Nueva pestaña" data-i18n-title="newTabTitle">+</button>
-    <button id="incognito-tab-btn" onclick="createIncognitoTab()" title="Nueva pestaña de incógnito">🕵️</button>
+    <button class="add-tab-btn" onclick="createNewTab()" data-i18n-title="newTabTitle">+</button>
+    <button id="incognito-tab-btn" onclick="createIncognitoTab()" data-i18n-title="incognitoTabTitle">🕵️</button>
   </div>
 
   <div id="nav-bar">
-    <button id="btn-undo" onclick="goBack()" title="Deshacer (Atrás)" data-i18n-title="undoTitle" disabled>↩️</button>
-    <button id="btn-redo" onclick="goForward()" title="Rehacer (Adelante)" data-i18n-title="redoTitle" disabled>↪️</button>
+    <button id="btn-undo" onclick="goBack()" data-i18n-title="undoTitle" disabled>↩️</button>
+    <button id="btn-redo" onclick="goForward()" data-i18n-title="redoTitle" disabled>↪️</button>
     
-    <button id="btn-home" onclick="goHome()" title="Inicio" data-i18n-title="homeTitle">🏠</button>
-    <button id="btn-reload" onclick="reloadTab()" title="Recargar página" data-i18n-title="reloadTitle">🔄</button>
+    <button id="btn-home" onclick="goHome()" data-i18n-title="homeTitle">🏠</button>
+    <button id="btn-reload" onclick="reloadTab()" data-i18n-title="reloadTitle">🔄</button>
     
     <div class="url-container">
-      <span id="security-badge" class="security-badge" onclick="openSecurityModal()" title="Estado de Seguridad">🛡️</span>
-      <span id="adblock-badge" class="adblock-counter" onclick="openSecurityModal()" title="Elementos Bloqueados">🚫 <span id="adblock-count-num">0</span></span>
-      <input type="text" id="url-bar" placeholder="Escribe una URL o busca...">
+      <span id="security-badge" class="security-badge" onclick="openSecurityModal()" data-i18n-title="securityBadgeTitle">🛡️</span>
+      <span id="adblock-badge" class="adblock-counter" onclick="openSecurityModal()" data-i18n-title="adblockBadgeTitle">🚫 <span id="adblock-count-num">0</span></span>
+      <input type="text" id="url-bar" data-i18n-placeholder="urlPlaceholder">
     </div>
 
     <button id="btn-go" onclick="navigate()" data-i18n="goBtn">IR</button>
     
-    <!-- Botones de Acción -->
-    <button id="btn-security-panel" onclick="openSecurityModal()" title="Centro de Seguridad" style="background:#0284c7;">🛡️</button>
-    <button id="btn-install" onclick="openInstallModal()" title="Guardar web" data-i18n-title="installAppTitle" style="background:#10b981;">💾</button>
+    <button id="btn-security-panel" onclick="openSecurityModal()" data-i18n-title="securityPanelTitle" style="background:#0284c7;">🛡️</button>
+    <button id="btn-install" onclick="openInstallModal()" data-i18n-title="installAppTitle" style="background:#10b981;">💾</button>
   </div>
 
   <div id="content-area">
@@ -535,8 +524,10 @@
         <div class="color-picker-group">
           <label for="lang-selector">🌐</label>
           <select id="lang-selector" class="lang-select" onchange="changeLanguage(this.value)">
-            <option value="es" selected>Español</option>
+            <option value="es">Español</option>
             <option value="en">English</option>
+            <option value="pt">Português</option>
+            <option value="fr">Français</option>
           </select>
         </div>
 
@@ -553,17 +544,17 @@
         </div>
 
         <div style="display: flex; gap: 4px; margin-left: 2px;">
-          <button class="preset-btn" style="background:#3b82f6;" title="Tema Azul" onclick="setPreset('#1a2234', '#3b82f6')"></button>
-          <button class="preset-btn" style="background:#a855f7;" title="Tema Morado" onclick="setPreset('#2e1065', '#a855f7')"></button>
-          <button class="preset-btn" style="background:#22c55e;" title="Tema Verde Matrix" onclick="setPreset('#052e16', '#22c55e')"></button>
-          <button class="preset-btn" style="background:#ef4444;" title="Tema Rojo" onclick="setPreset('#450a0a', '#ef4444')"></button>
-          <button class="preset-btn" style="background:#64748b;" title="Tema Oscuro" onclick="setPreset('#0f172a', '#64748b')"></button>
+          <button class="preset-btn" style="background:#3b82f6;" data-i18n-title="presetBlue" onclick="setPreset('#1a2234', '#3b82f6')"></button>
+          <button class="preset-btn" style="background:#a855f7;" data-i18n-title="presetPurple" onclick="setPreset('#2e1065', '#a855f7')"></button>
+          <button class="preset-btn" style="background:#22c55e;" data-i18n-title="presetGreen" onclick="setPreset('#052e16', '#22c55e')"></button>
+          <button class="preset-btn" style="background:#ef4444;" data-i18n-title="presetRed" onclick="setPreset('#450a0a', '#ef4444')"></button>
+          <button class="preset-btn" style="background:#64748b;" data-i18n-title="presetDark" onclick="setPreset('#0f172a', '#64748b')"></button>
         </div>
 
         <span style="border-left: 1px solid var(--border-color); padding-left: 8px; margin-left: 4px;">🖼️</span>
         <button class="bg-btn" onclick="document.getElementById('bg-file-input').click()" data-i18n="uploadPc">📁 Subir PC</button>
         <button class="bg-btn" onclick="setBgUrl()" data-i18n="urlBg">🔗 URL</button>
-        <button class="bg-btn" onclick="resetBg()" title="Restaurar fondo.jpg" data-i18n-title="restoreBgTitle">↩️</button>
+        <button class="bg-btn" onclick="resetBg()" data-i18n-title="restoreBgTitle">↩️</button>
 
         <input type="file" id="bg-file-input" accept="image/*" style="display: none;" onchange="setBgFile(event)">
       </div>
@@ -572,25 +563,24 @@
 
       <div class="search-container">
         <select id="engine-selector" class="engine-select" onchange="changeSearchEngine(this.value)">
-          <option value="osc">⚡ OSC Search (Propio)</option>
-          <option value="google">🌐 Google</option>
-          <option value="duckduckgo">🦆 DuckDuckGo</option>
-          <option value="bing">🔍 Bing</option>
-          <option value="wikipedia">📚 Wikipedia</option>
-          <option value="youtube">▶️ YouTube</option>
-          <option value="ecosia">🌱 Ecosia</option>
+          <option value="osc" data-i18n="engineOsc">⚡ OSC Search (Propio)</option>
+          <option value="google" data-i18n="engineGoogle">🌐 Google</option>
+          <option value="duckduckgo" data-i18n="engineDdg">🦆 DuckDuckGo</option>
+          <option value="bing" data-i18n="engineBing">🔍 Bing</option>
+          <option value="wikipedia" data-i18n="engineWiki">📚 Wikipedia</option>
+          <option value="youtube" data-i18n="engineYt">▶️ YouTube</option>
+          <option value="ecosia" data-i18n="engineEcosia">🌱 Ecosia</option>
         </select>
-        <input type="text" id="search-input" class="search-box" placeholder="Buscar en OSC Search o escribir URL...">
+        <input type="text" id="search-input" class="search-box" data-i18n-placeholder="searchPlaceholder">
       </div>
 
       <div class="shortcuts-grid">
          <div class="shortcut" onclick="openUrl('https://www.google.com')">Google</div>
          <div class="shortcut" onclick="openUrl('https://www.wikipedia.org')">Wiki</div>
          <div class="shortcut" onclick="openUrl('https://www.youtube.com')">YT</div>
-         <div class="shortcut" onclick="openUrl('osc://parkourgame')" style="border-color:#10b981; color:#10b981;">🏃 Juego</div>
+         <div class="shortcut" onclick="openUrl('osc://parkourgame')" style="border-color:#10b981; color:#10b981;" data-i18n="shortcutGame">🏃 Juego</div>
       </div>
 
-      <!-- Sección de Webs Guardadas -->
       <div id="installed-apps-section">
         <div style="font-size: 14px; font-weight: bold; color: white;" data-i18n="installedAppsTitle">📌 Mis Webs Guardadas</div>
         <div id="apps-container" class="apps-grid"></div>
@@ -601,37 +591,36 @@
 
   </div>
 
-  <!-- Modal del Centro de Seguridad y AdBlocker -->
   <div id="security-modal" class="modal-overlay">
     <div class="modal-box" style="width: 440px;">
       <h3>🛡️ <span data-i18n="securityTitle">Centro de Seguridad & AdBlock</span></h3>
       
       <div id="security-status-box" style="padding: 10px; border-radius: 8px; font-size: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;">
-        <b>Estado:</b> <span id="security-status-text">Protección activa y conexión segura.</span>
+        <b data-i18n="statusLabel">Estado:</b> <span id="security-status-text"></span>
       </div>
 
       <div class="modal-checkbox">
         <input type="checkbox" id="sec-adblock-toggle" onchange="toggleSecurityOption('adBlockEnabled', this.checked)">
-        <label for="sec-adblock-toggle" data-i18n="secAdblockLabel"><b>Bloqueador de Anuncios (AdBlock):</b> Filtra ventanas emergentes y dominios de publicidad (incluyendo ads de YT).</label>
+        <label for="sec-adblock-toggle" data-i18n="secAdblockLabel"></label>
       </div>
 
       <div class="modal-checkbox">
         <input type="checkbox" id="sec-tracker-toggle" onchange="toggleSecurityOption('trackerBlockEnabled', this.checked)">
-        <label for="sec-tracker-toggle" data-i18n="secTrackerLabel"><b>Bloqueador de Rastreadores:</b> Impide el seguimiento de Google Analytics, Facebook Pixel y mas scripts de rastreo.</label>
+        <label for="sec-tracker-toggle" data-i18n="secTrackerLabel"></label>
       </div>
 
       <div class="modal-checkbox">
         <input type="checkbox" id="sec-shield-toggle" onchange="toggleSecurityOption('shieldEnabled', this.checked)">
-        <label for="sec-shield-toggle" data-i18n="secShieldLabel"><b>Escudo Phishing:</b> Bloquea dominios maliciosos y descargas de ejecutables peligrosos.</label>
+        <label for="sec-shield-toggle" data-i18n="secShieldLabel"></label>
       </div>
 
       <div class="modal-checkbox">
         <input type="checkbox" id="sec-http-toggle" onchange="toggleSecurityOption('warnHttp', this.checked)">
-        <label for="sec-http-toggle" data-i18n="secHttpLabel"><b>Advertir sitios no cifrados (HTTP):</b> Alerta si una web no usa conexion HTTPS.</label>
+        <label for="sec-http-toggle" data-i18n="secHttpLabel"></label>
       </div>
 
       <div style="background: var(--bg-dark); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center;">
-        <span>🚫 Total de elementos filtrados:</span>
+        <span data-i18n="blockedTotalLabel">🚫 Total de elementos filtrados:</span>
         <b id="modal-blocked-count" style="color: #ef4444; font-size: 14px;">0</b>
       </div>
 
@@ -639,7 +628,7 @@
 
       <div class="modal-field">
         <label data-i18n="pinLabel">🔑 PIN de Control Parental / Bloqueo (Opcional):</label>
-        <input type="password" id="sec-pin-input" placeholder="Ingresa PIN de 4 dígitos" maxlength="4">
+        <input type="password" id="sec-pin-input" data-i18n-placeholder="pinPlaceholder" maxlength="4">
       </div>
 
       <div class="modal-buttons">
@@ -649,14 +638,13 @@
     </div>
   </div>
 
-  <!-- Modal para Guardar Web -->
   <div id="install-modal" class="modal-overlay">
     <div class="modal-box">
       <h3 data-i18n="modalTitle">💾 Guardar Web</h3>
       
       <div class="modal-field">
         <label data-i18n="appNameLabel">Nombre de la página:</label>
-        <input type="text" id="app-name-input" placeholder="Ej: Mi Sitio Web">
+        <input type="text" id="app-name-input" data-i18n-placeholder="appNamePlaceholder">
       </div>
 
       <div class="modal-field">
@@ -670,8 +658,8 @@
       </div>
 
       <div id="pwa-native-option" style="display:none; font-size:12px; background:rgba(16, 185, 129, 0.2); border:1px solid #10b981; padding:8px; border-radius:6px; color:#6ee7b7;">
-        💡 <span data-i18n="pwaAvailable">¡OCS Browser puede instalarse como app nativa en tu dispositivo!</span>
-        <button onclick="triggerPwaInstall()" style="margin-top:6px; width:100%; background:#10b981;" data-i18n="installNativeBtn">Instalar OCS Browser en PC/Móvil</button>
+        💡 <span data-i18n="pwaAvailable"></span>
+        <button onclick="triggerPwaInstall()" style="margin-top:6px; width:100%; background:#10b981;" data-i18n="installNativeBtn"></button>
       </div>
 
       <div class="modal-buttons">
@@ -681,20 +669,19 @@
     </div>
   </div>
 
-  <!-- Modal de Bienvenida -->
   <div id="welcome-modal" class="modal-overlay">
     <div class="welcome-box">
       <div class="welcome-icon">🚀</div>
-      <h2 data-i18n="welcomeTitle">¡Bienvenido a OCS Browser! 👋</h2>
-      <p data-i18n="welcomeDesc">Tu navegador ultraligero enfocado en contenido libre, privacidad y navegación rápida.</p>
+      <h2 data-i18n="welcomeTitle"></h2>
+      <p data-i18n="welcomeDesc"></p>
       
       <div class="welcome-features">
-        <div data-i18n="welcomeFeature1">⚡ <b>OSC Search:</b> Resultados e información libre de derechos.</div>
-        <div data-i18n="welcomeFeature2">🚫 <b>AdBlock + Anti-Rastreo:</b> Navegación limpia sin anuncios ni cookies espía.</div>
-        <div data-i18n="welcomeFeature3">🛡️ <b>Protección Integrada:</b> Filtro en tiempo real contra descargas sospechosas y malware.</div>
+        <div data-i18n="welcomeFeature1"></div>
+        <div data-i18n="welcomeFeature2"></div>
+        <div data-i18n="welcomeFeature3"></div>
       </div>
 
-      <button onclick="closeWelcomeModal()" style="padding: 10px; font-size: 14px; border-radius: 8px;" data-i18n="welcomeBtn">¡Empezar a navegar! 🚀</button>
+      <button onclick="closeWelcomeModal()" style="padding: 10px; font-size: 14px; border-radius: 8px;" data-i18n="welcomeBtn"></button>
     </div>
   </div>
 
@@ -707,7 +694,6 @@
     let deferredPrompt = null;
     let blockedTotalCount = 0;
 
-    // Configuración de Seguridad y Filtros
     let securityConfig = {
       shieldEnabled: true,
       warnHttp: true,
@@ -717,7 +703,6 @@
       pin: ''
     };
 
-    // Listas de dominios de publicidad y rastreadores conocidos
     const adDomains = [
       'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
       'pagead2.googlesyndication.com', 'adservice.google.com', 'youtube.com/pagead/',
@@ -734,9 +719,12 @@
     const suspiciousKeywords = ['phishing', 'fake-login', 'free-money-now', 'account-verify-stealer', 'malware-download'];
     const dangerousExtensions = ['.exe', '.bat', '.vbs', '.cmd', '.scr', '.msi', '.ps1'];
 
-    // Diccionario de Traducciones
+    // ============================================================
+    // TRADUCCIONES — 4 IDIOMAS COMPLETOS
+    // ============================================================
     const translations = {
       es: {
+        // Tooltips generales
         undoTitle: "Deshacer (Atrás)",
         redoTitle: "Rehacer (Adelante)",
         menuLabel: "Menú:",
@@ -747,40 +735,126 @@
         homeTitle: "Inicio",
         reloadTitle: "Recargar página",
         newTabTitle: "Nueva pestaña",
+        incognitoTabTitle: "Nueva pestaña de incógnito",
+        installAppTitle: "Guardar web",
+        securityPanelTitle: "Centro de Seguridad",
+        securityBadgeTitle: "Estado de Seguridad",
+        adblockBadgeTitle: "Elementos Bloqueados",
+        // Presets
+        presetBlue: "Tema Azul",
+        presetPurple: "Tema Morado",
+        presetGreen: "Tema Verde Matrix",
+        presetRed: "Tema Rojo",
+        presetDark: "Tema Oscuro",
+        // Barra URL/Búsqueda
         urlPlaceholder: "Escribe una URL o busca...",
         goBtn: "IR",
         searchPlaceholder: "Buscar en {engine} o escribir URL...",
+        // Motores
+        engineOsc: "⚡ OSC Search (Propio)",
+        engineGoogle: "🌐 Google",
+        engineDdg: "🦆 DuckDuckGo",
+        engineBing: "🔍 Bing",
+        engineWiki: "📚 Wikipedia",
+        engineYt: "▶️ YouTube",
+        engineEcosia: "🌱 Ecosia",
+        // Atajos
+        shortcutGame: "🏃 Juego",
+        // Pestañas especiales
         newTabDefault: "Nueva pestaña",
+        gameTabTitle: "🏃 Minijuego Parkour",
+        incognitoTabLabel: "🕵️ Incógnito",
+        oscTabPrefix: "⚡",
+        // OSC Search
         oscTitle: "Resultados libres de derechos para:",
+        oscHeader: "⚡ OSC Search (Sin Publicidad)",
+        oscTagOpenSource: "Open Source / Wiki",
+        oscTagPublicDomain: "Dominio Público",
+        oscTagOpenSearch: "Búsqueda Abierta",
+        oscTagFreeFiles: "Archivos Libres",
         wikiDesc: "Explora contenido libre de derechos de autor e información de libre acceso en la enciclopedia global.",
         commonsDesc: "Repositorio con millones de imágenes, audios y videos de contenido libre sin copyright.",
         openverseDesc: "Motor de búsqueda para más de 600 millones de imágenes y audios con licencias Creative Commons.",
         archiveDesc: "Accede a libros, películas, software y páginas web históricas preservadas en dominio público.",
-        promptBgUrl: "Ingresa la URL de la imagen para el fondo:",
-        installAppTitle: "Guardar web",
+        // Webs guardadas
         installedAppsTitle: "📌 Mis Webs Guardadas",
+        emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!",
+        // Modal guardar web
         modalTitle: "💾 Guardar Web",
         appNameLabel: "Nombre de la página:",
+        appNamePlaceholder: "Ej: Mi Sitio Web",
         appUrlLabel: "URL o Búsqueda:",
         appIconLabel: "Icono / Emoji:",
         cancelBtn: "Cancelar",
         confirmInstallBtn: "Guardar",
         pwaAvailable: "¡OCS Browser puede instalarse como app nativa en tu sistema!",
         installNativeBtn: "Instalar OCS Browser en PC/Móvil",
-        emptyApps: "No tienes páginas guardadas. ¡Navega a una web y pulsa 💾 para guardarla!",
+        // Bienvenida
         welcomeTitle: "¡Bienvenido a OCS Browser! 👋",
         welcomeDesc: "Tu navegador ultraligero enfocado en contenido libre, privacidad y navegación segura.",
         welcomeFeature1: "⚡ <b>OSC Search:</b> Resultados e información libre de derechos.",
         welcomeFeature2: "🚫 <b>AdBlock + Anti-Rastreo:</b> Navegación limpia sin anuncios ni cookies espía.",
         welcomeFeature3: "🛡️ <b>Protección Integrada:</b> Filtro en tiempo real contra descargas sospechosas y malware.",
         welcomeBtn: "¡Empezar a navegar! 🚀",
+        // Seguridad
         securityTitle: "Centro de Seguridad & AdBlock",
+        statusLabel: "Estado:",
         secAdblockLabel: "<b>Bloqueador de Anuncios (AdBlock):</b> Filtra ventanas emergentes y dominios de publicidad.",
         secTrackerLabel: "<b>Bloqueador de Rastreadores:</b> Impide el seguimiento de Google Analytics y pixels espía.",
-        secShieldLabel: "<b>Escudo Phishing:</b> Bloquea dominios maliciosos y ejecutable peligrosos.",
+        secShieldLabel: "<b>Escudo Phishing:</b> Bloquea dominios maliciosos y ejecutables peligrosos.",
         secHttpLabel: "<b>Advertir sitios no cifrados (HTTP):</b> Alerta si una web no usa HTTPS.",
+        blockedTotalLabel: "🚫 Total de elementos filtrados:",
         pinLabel: "🔑 PIN de Control Parental / Bloqueo (Opcional):",
-        savePinBtn: "Guardar PIN"
+        pinPlaceholder: "Ingresa PIN de 4 dígitos",
+        savePinBtn: "Guardar PIN",
+        // Estados de seguridad
+        secStatusSafeDefault: "Conexión cifrada, AdBlock y protección activa.",
+        secStatusWarnDefault: "Advertencia: La conexión no es HTTPS.",
+        secStatusDangerDefault: "¡Peligro! Sitio sospechoso o de anuncios masivos bloqueado.",
+        secStatusHome: "Página de inicio protegida.",
+        secStatusGame: "Modo Juego Local OCS.",
+        secStatusOsc: "Motor OSC Search seguro (Sin Anuncios).",
+        secStatusIncognito: "Estás en modo incógnito: no se guardan cookies ni historial.",
+        secBadgeSafeTitle: "Sitio seguro (HTTPS)",
+        secBadgeWarnTitle: "Precaución: Sitio no cifrado (HTTP)",
+        secBadgeDangerTitle: "Sitio bloqueado por seguridad",
+        // Razones de bloqueo
+        reasonAd: "Se ha bloqueado la carga directa de un dominio publicitario ({domain}).",
+        reasonTracker: "Se ha bloqueado un servicio de rastreo de actividad ({domain}).",
+        reasonExecutable: "Se ha bloqueado la descarga/ejecución directa de archivos peligrosos ({ext}).",
+        reasonPhishing: "El sitio contiene patrones sospechosos o posibles amenazas de Phishing/Malware (\"{kw}\").",
+        reasonHttpWarn: "Este sitio web no utiliza una conexión cifrada HTTPS. Tus datos podrían no estar protegidos.",
+        // Página bloqueada / juego
+        blockedHeader: "No se puede acceder a la web, pero puedes jugar este minijuego",
+        gameHeader: "Plataforma de Parkour OCS 🏃",
+        gameSubHeader: "A/D o Flechas (Mover) | Espacio/Arriba/W (Saltar)",
+        gameControls: "Controles: ← → / A D (Mover) | ESPACIO / ↑ / W (Salta)",
+        gameBackBtn: "Volver al Inicio Seguro 🏠",
+        gameOverTitle: "¡CAÍSTE AL VACÍO!",
+        gameLevelReached: "Nivel alcanzado: ",
+        gamePressSpace: " | Presiona Espacio para Reiniciar",
+        gameLevelLabel: "Nivel Parkour: ",
+        // Incógnito
+        incognitoBanner: "🕵️ Estás en modo incógnito: no se guardan cookies, no se guarda historial y no se puede iniciar sesión.",
+        incognitoHomeTitle: "Modo Incógnito Privado",
+        incognitoHomeDesc: "Estas en modo incognito, aqui no se guardan cookies ni un solo historial",
+        incognitoFeature1: "🚫 <b>Cookies y almacenamiento web:</b> Totalmente desactivados.",
+        incognitoFeature2: "🚫 <b>Historial de navegación:</b> No se registra ninguna actividad.",
+        incognitoFeature3: "🔒 <b>Inicio de sesión:</b> Deshabilitado por protección de privacidad.",
+        incognitoFeature4: "💾 <b>Webs guardadas:</b> Bloqueadas en modo privado.",
+        // Alertas / Prompts
+        alertPinEnter: "Ingresa el PIN de seguridad para acceder a la configuración:",
+        alertPinIncorrect: "PIN incorrecto.",
+        alertPinSaved: "¡PIN de seguridad guardado correctamente!",
+        alertPinRemoved: "PIN eliminado.",
+        alertPinDelete: "Ingresa el PIN para eliminar una web guardada:",
+        alertIncognitoNoSave: "No puedes guardar webs mientras navegas en modo incógnito.",
+        alertIncognitoNoSaveModal: "No se pueden guardar webs en modo incógnito.",
+        alertCompleteFields: "Por favor completa el nombre y la URL.",
+        promptBgUrl: "Ingresa la URL de la imagen para el fondo:",
+        promptTabName: "Escribe el nuevo nombre de la pestaña:",
+        promptTabRenameTooltip: "Haz doble clic para renombrar esta pestaña",
+        promptFallbackAppName: "Mi Sitio Web"
       },
       en: {
         undoTitle: "Undo (Back)",
@@ -793,27 +867,52 @@
         homeTitle: "Home",
         reloadTitle: "Reload page",
         newTabTitle: "New tab",
+        incognitoTabTitle: "New incognito tab",
+        installAppTitle: "Save web page",
+        securityPanelTitle: "Security Center",
+        securityBadgeTitle: "Security Status",
+        adblockBadgeTitle: "Blocked Elements",
+        presetBlue: "Blue Theme",
+        presetPurple: "Purple Theme",
+        presetGreen: "Matrix Green Theme",
+        presetRed: "Red Theme",
+        presetDark: "Dark Theme",
         urlPlaceholder: "Type a URL or search...",
         goBtn: "GO",
         searchPlaceholder: "Search in {engine} or type URL...",
+        engineOsc: "⚡ OSC Search (Own)",
+        engineGoogle: "🌐 Google",
+        engineDdg: "🦆 DuckDuckGo",
+        engineBing: "🔍 Bing",
+        engineWiki: "📚 Wikipedia",
+        engineYt: "▶️ YouTube",
+        engineEcosia: "🌱 Ecosia",
+        shortcutGame: "🏃 Game",
         newTabDefault: "New tab",
+        gameTabTitle: "🏃 Parkour Minigame",
+        incognitoTabLabel: "🕵️ Incognito",
+        oscTabPrefix: "⚡",
         oscTitle: "Copyright-free results for:",
+        oscHeader: "⚡ OSC Search (Ad-Free)",
+        oscTagOpenSource: "Open Source / Wiki",
+        oscTagPublicDomain: "Public Domain",
+        oscTagOpenSearch: "Open Search",
+        oscTagFreeFiles: "Free Files",
         wikiDesc: "Explore copyright-free content and open-access information in the global encyclopedia.",
         commonsDesc: "Repository with millions of free images, audio, and videos without copyright.",
         openverseDesc: "Search engine for over 600 million images and audio under Creative Commons licenses.",
         archiveDesc: "Access books, movies, software, and historical web pages preserved in the public domain.",
-        promptBgUrl: "Enter the image URL for the background:",
-        installAppTitle: "Save web page",
         installedAppsTitle: "📌 My Saved Web Pages",
+        emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!",
         modalTitle: "💾 Save Web Page",
         appNameLabel: "Page Name:",
+        appNamePlaceholder: "e.g. My Website",
         appUrlLabel: "URL or Search:",
         appIconLabel: "Icon / Emoji:",
         cancelBtn: "Cancel",
         confirmInstallBtn: "Save",
         pwaAvailable: "OCS Browser can be installed as a native app on your system!",
         installNativeBtn: "Install OCS Browser on PC/Mobile",
-        emptyApps: "No saved pages. Browse to a web page and click 💾 to save it!",
         welcomeTitle: "Welcome to OCS Browser! 👋",
         welcomeDesc: "Your lightweight browser focused on open content, privacy, and secure browsing.",
         welcomeFeature1: "⚡ <b>OSC Search:</b> Find copyright-free search results and media.",
@@ -821,16 +920,297 @@
         welcomeFeature3: "🛡️ <b>Integrated Protection:</b> Real-time shield against malware and unsafe sites.",
         welcomeBtn: "Start Browsing! 🚀",
         securityTitle: "OSC Security & AdBlock Center",
+        statusLabel: "Status:",
         secAdblockLabel: "<b>AdBlocker:</b> Filters pop-ups and ad network domains.",
         secTrackerLabel: "<b>Tracker Blocker:</b> Blocks Google Analytics and tracking pixels.",
         secShieldLabel: "<b>Real-Time Shield:</b> Block phishing domains and unsafe executables.",
         secHttpLabel: "<b>Warn Unencrypted Sites (HTTP):</b> Alert if a website does not use HTTPS.",
+        blockedTotalLabel: "🚫 Total blocked elements:",
         pinLabel: "🔑 Parental Control / Lock PIN (Optional):",
-        savePinBtn: "Save PIN"
+        pinPlaceholder: "Enter 4-digit PIN",
+        savePinBtn: "Save PIN",
+        secStatusSafeDefault: "Encrypted connection, AdBlock and protection active.",
+        secStatusWarnDefault: "Warning: The connection is not HTTPS.",
+        secStatusDangerDefault: "Danger! Suspicious site or mass advertising blocked.",
+        secStatusHome: "Protected home page.",
+        secStatusGame: "OCS Local Game Mode.",
+        secStatusOsc: "Safe OSC Search engine (Ad-Free).",
+        secStatusIncognito: "You're in incognito mode: no cookies or history are stored.",
+        secBadgeSafeTitle: "Secure site (HTTPS)",
+        secBadgeWarnTitle: "Caution: Unencrypted site (HTTP)",
+        secBadgeDangerTitle: "Site blocked for security",
+        reasonAd: "Direct load of an advertising domain ({domain}) has been blocked.",
+        reasonTracker: "A tracking service ({domain}) has been blocked.",
+        reasonExecutable: "Direct download/execution of dangerous files ({ext}) has been blocked.",
+        reasonPhishing: "The site contains suspicious Phishing/Malware patterns (\"{kw}\").",
+        reasonHttpWarn: "This website does not use an encrypted HTTPS connection. Your data may not be protected.",
+        blockedHeader: "Can't access the website, but you can play this minigame",
+        gameHeader: "OCS Parkour Platformer 🏃",
+        gameSubHeader: "A/D or Arrows (Move) | Space/Up/W (Jump)",
+        gameControls: "Controls: ← → / A D (Move) | SPACE / ↑ / W (Jump)",
+        gameBackBtn: "Back to Safe Home 🏠",
+        gameOverTitle: "YOU FELL INTO THE VOID!",
+        gameLevelReached: "Level reached: ",
+        gamePressSpace: " | Press Space to Restart",
+        gameLevelLabel: "Parkour Level: ",
+        incognitoBanner: "🕵️ You're in incognito mode: cookies, history, and logins are completely disabled.",
+        incognitoHomeTitle: "Private Incognito Mode",
+        incognitoHomeDesc: "You're in incognito mode, no cookies or history are stored here",
+        incognitoFeature1: "🚫 <b>Cookies & web storage:</b> Completely disabled.",
+        incognitoFeature2: "🚫 <b>Browsing history:</b> No activity is recorded.",
+        incognitoFeature3: "🔒 <b>Login:</b> Disabled for privacy protection.",
+        incognitoFeature4: "💾 <b>Saved pages:</b> Blocked in private mode.",
+        alertPinEnter: "Enter the security PIN to access settings:",
+        alertPinIncorrect: "Incorrect PIN.",
+        alertPinSaved: "Security PIN saved successfully!",
+        alertPinRemoved: "PIN removed.",
+        alertPinDelete: "Enter the PIN to delete a saved page:",
+        alertIncognitoNoSave: "You can't save websites while browsing in incognito mode.",
+        alertIncognitoNoSaveModal: "You can't save websites in incognito mode.",
+        alertCompleteFields: "Please fill in the name and URL.",
+        promptBgUrl: "Enter the image URL for the background:",
+        promptTabName: "Enter the new tab name:",
+        promptTabRenameTooltip: "Double click to rename this tab",
+        promptFallbackAppName: "My Website"
+      },
+      pt: {
+        undoTitle: "Desfazer (Voltar)",
+        redoTitle: "Refazer (Avançar)",
+        menuLabel: "Menu:",
+        accentLabel: "Bordas/Botões:",
+        uploadPc: "📁 Enviar do PC",
+        urlBg: "🔗 URL",
+        restoreBgTitle: "Restaurar background.jpg",
+        homeTitle: "Início",
+        reloadTitle: "Recarregar página",
+        newTabTitle: "Nova aba",
+        incognitoTabTitle: "Nova aba anônima",
+        installAppTitle: "Salvar página",
+        securityPanelTitle: "Central de Segurança",
+        securityBadgeTitle: "Status de Segurança",
+        adblockBadgeTitle: "Elementos Bloqueados",
+        presetBlue: "Tema Azul",
+        presetPurple: "Tema Roxo",
+        presetGreen: "Tema Verde Matrix",
+        presetRed: "Tema Vermelho",
+        presetDark: "Tema Escuro",
+        urlPlaceholder: "Digite uma URL ou pesquise...",
+        goBtn: "IR",
+        searchPlaceholder: "Pesquisar em {engine} ou digitar URL...",
+        engineOsc: "⚡ OSC Search (Próprio)",
+        engineGoogle: "🌐 Google",
+        engineDdg: "🦆 DuckDuckGo",
+        engineBing: "🔍 Bing",
+        engineWiki: "📚 Wikipedia",
+        engineYt: "▶️ YouTube",
+        engineEcosia: "🌱 Ecosia",
+        shortcutGame: "🏃 Jogo",
+        newTabDefault: "Nova aba",
+        gameTabTitle: "🏃 Minijogo Parkour",
+        incognitoTabLabel: "🕵️ Anônimo",
+        oscTabPrefix: "⚡",
+        oscTitle: "Resultados livres de direitos autorais para:",
+        oscHeader: "⚡ OSC Search (Sem Anúncios)",
+        oscTagOpenSource: "Open Source / Wiki",
+        oscTagPublicDomain: "Domínio Público",
+        oscTagOpenSearch: "Busca Aberta",
+        oscTagFreeFiles: "Arquivos Livres",
+        wikiDesc: "Explore conteúdo livre de direitos autorais e informação de acesso aberto na enciclopédia global.",
+        commonsDesc: "Repositório com milhões de imagens, áudios e vídeos de conteúdo livre sem direitos autorais.",
+        openverseDesc: "Motor de busca para mais de 600 milhões de imagens e áudios com licenças Creative Commons.",
+        archiveDesc: "Acesse livros, filmes, softwares e páginas web históricas preservadas em domínio público.",
+        installedAppsTitle: "📌 Minhas Páginas Salvas",
+        emptyApps: "Você não tem páginas salvas. Navegue por um site e clique em 💾 para salvar!",
+        modalTitle: "💾 Salvar Página",
+        appNameLabel: "Nome da página:",
+        appNamePlaceholder: "Ex: Meu Site",
+        appUrlLabel: "URL ou Busca:",
+        appIconLabel: "Ícone / Emoji:",
+        cancelBtn: "Cancelar",
+        confirmInstallBtn: "Salvar",
+        pwaAvailable: "O OCS Browser pode ser instalado como app nativo no seu sistema!",
+        installNativeBtn: "Instalar OCS Browser no PC/Celular",
+        welcomeTitle: "Bem-vindo ao OCS Browser! 👋",
+        welcomeDesc: "Seu navegador ultraleve focado em conteúdo livre, privacidade e navegação segura.",
+        welcomeFeature1: "⚡ <b>OSC Search:</b> Resultados e informações livres de direitos.",
+        welcomeFeature2: "🚫 <b>AdBlock + Anti-Rastreamento:</b> Navegação limpa sem anúncios ou cookies espiões.",
+        welcomeFeature3: "🛡️ <b>Proteção Integrada:</b> Filtro em tempo real contra downloads suspeitos e malware.",
+        welcomeBtn: "Começar a navegar! 🚀",
+        securityTitle: "Central de Segurança & AdBlock",
+        statusLabel: "Status:",
+        secAdblockLabel: "<b>Bloqueador de Anúncios (AdBlock):</b> Filtra pop-ups e domínios de publicidade.",
+        secTrackerLabel: "<b>Bloqueador de Rastreadores:</b> Impede o rastreamento do Google Analytics e pixels espiões.",
+        secShieldLabel: "<b>Escudo Anti-Phishing:</b> Bloqueia domínios maliciosos e executáveis perigosos.",
+        secHttpLabel: "<b>Avisar sites não criptografados (HTTP):</b> Alerta se um site não usa HTTPS.",
+        blockedTotalLabel: "🚫 Total de elementos filtrados:",
+        pinLabel: "🔑 PIN de Controle Parental / Bloqueio (Opcional):",
+        pinPlaceholder: "Digite PIN de 4 dígitos",
+        savePinBtn: "Salvar PIN",
+        secStatusSafeDefault: "Conexão criptografada, AdBlock e proteção ativos.",
+        secStatusWarnDefault: "Aviso: A conexão não é HTTPS.",
+        secStatusDangerDefault: "Perigo! Site suspeito ou com publicidade em massa bloqueado.",
+        secStatusHome: "Página inicial protegida.",
+        secStatusGame: "Modo Jogo Local OCS.",
+        secStatusOsc: "Motor OSC Search seguro (Sem Anúncios).",
+        secStatusIncognito: "Você está no modo anônimo: cookies e histórico não são salvos.",
+        secBadgeSafeTitle: "Site seguro (HTTPS)",
+        secBadgeWarnTitle: "Cuidado: Site não criptografado (HTTP)",
+        secBadgeDangerTitle: "Site bloqueado por segurança",
+        reasonAd: "O carregamento direto de um domínio publicitário ({domain}) foi bloqueado.",
+        reasonTracker: "Um serviço de rastreamento ({domain}) foi bloqueado.",
+        reasonExecutable: "O download/execução direta de arquivos perigosos ({ext}) foi bloqueado.",
+        reasonPhishing: "O site contém padrões suspeitos de Phishing/Malware (\"{kw}\").",
+        reasonHttpWarn: "Este site não usa uma conexão HTTPS criptografada. Seus dados podem não estar protegidos.",
+        blockedHeader: "Não é possível acessar o site, mas você pode jogar este minijogo",
+        gameHeader: "Plataforma de Parkour OCS 🏃",
+        gameSubHeader: "A/D ou Setas (Mover) | Espaço/Cima/W (Pular)",
+        gameControls: "Controles: ← → / A D (Mover) | ESPAÇO / ↑ / W (Pular)",
+        gameBackBtn: "Voltar ao Início Seguro 🏠",
+        gameOverTitle: "VOCÊ CAIU NO VAZIO!",
+        gameLevelReached: "Nível alcançado: ",
+        gamePressSpace: " | Pressione Espaço para Reiniciar",
+        gameLevelLabel: "Nível Parkour: ",
+        incognitoBanner: "🕵️ Você está no modo anônimo: cookies, histórico e login estão totalmente desativados.",
+        incognitoHomeTitle: "Modo Anônimo Privado",
+        incognitoHomeDesc: "Você está no modo anônimo, aqui não são salvos cookies nem histórico",
+        incognitoFeature1: "🚫 <b>Cookies e armazenamento web:</b> Totalmente desativados.",
+        incognitoFeature2: "🚫 <b>Histórico de navegação:</b> Nenhuma atividade é registrada.",
+        incognitoFeature3: "🔒 <b>Login:</b> Desativado por proteção de privacidade.",
+        incognitoFeature4: "💾 <b>Páginas salvas:</b> Bloqueadas no modo privado.",
+        alertPinEnter: "Digite o PIN de segurança para acessar as configurações:",
+        alertPinIncorrect: "PIN incorreto.",
+        alertPinSaved: "PIN de segurança salvo com sucesso!",
+        alertPinRemoved: "PIN removido.",
+        alertPinDelete: "Digite o PIN para excluir uma página salva:",
+        alertIncognitoNoSave: "Você não pode salvar sites enquanto navega no modo anônimo.",
+        alertIncognitoNoSaveModal: "Não é possível salvar sites no modo anônimo.",
+        alertCompleteFields: "Por favor, preencha o nome e a URL.",
+        promptBgUrl: "Digite a URL da imagem para o plano de fundo:",
+        promptTabName: "Digite o novo nome da aba:",
+        promptTabRenameTooltip: "Clique duas vezes para renomear esta aba",
+        promptFallbackAppName: "Meu Site"
+      },
+      fr: {
+        undoTitle: "Annuler (Retour)",
+        redoTitle: "Rétablir (Avancer)",
+        menuLabel: "Menu :",
+        accentLabel: "Bordures/Boutons :",
+        uploadPc: "📁 Depuis le PC",
+        urlBg: "🔗 URL",
+        restoreBgTitle: "Restaurer background.jpg",
+        homeTitle: "Accueil",
+        reloadTitle: "Recharger la page",
+        newTabTitle: "Nouvel onglet",
+        incognitoTabTitle: "Nouvel onglet privé",
+        installAppTitle: "Enregistrer la page",
+        securityPanelTitle: "Centre de Sécurité",
+        securityBadgeTitle: "État de Sécurité",
+        adblockBadgeTitle: "Éléments Bloqués",
+        presetBlue: "Thème Bleu",
+        presetPurple: "Thème Violet",
+        presetGreen: "Thème Vert Matrix",
+        presetRed: "Thème Rouge",
+        presetDark: "Thème Sombre",
+        urlPlaceholder: "Tapez une URL ou recherchez...",
+        goBtn: "OK",
+        searchPlaceholder: "Rechercher dans {engine} ou taper une URL...",
+        engineOsc: "⚡ OSC Search (Propre)",
+        engineGoogle: "🌐 Google",
+        engineDdg: "🦆 DuckDuckGo",
+        engineBing: "🔍 Bing",
+        engineWiki: "📚 Wikipédia",
+        engineYt: "▶️ YouTube",
+        engineEcosia: "🌱 Ecosia",
+        shortcutGame: "🏃 Jeu",
+        newTabDefault: "Nouvel onglet",
+        gameTabTitle: "🏃 Mini-jeu Parkour",
+        incognitoTabLabel: "🕵️ Privé",
+        oscTabPrefix: "⚡",
+        oscTitle: "Résultats libres de droits pour :",
+        oscHeader: "⚡ OSC Search (Sans Publicité)",
+        oscTagOpenSource: "Open Source / Wiki",
+        oscTagPublicDomain: "Domaine Public",
+        oscTagOpenSearch: "Recherche Ouverte",
+        oscTagFreeFiles: "Fichiers Libres",
+        wikiDesc: "Explorez du contenu libre de droits et des informations en accès libre dans l'encyclopédie mondiale.",
+        commonsDesc: "Dépôt avec des millions d'images, d'audios et de vidéos libres de droits.",
+        openverseDesc: "Moteur de recherche pour plus de 600 millions d'images et audios sous licences Creative Commons.",
+        archiveDesc: "Accédez à des livres, films, logiciels et pages web historiques préservés dans le domaine public.",
+        installedAppsTitle: "📌 Mes Pages Enregistrées",
+        emptyApps: "Aucune page enregistrée. Naviguez vers un site et cliquez sur 💾 pour l'enregistrer !",
+        modalTitle: "💾 Enregistrer la Page",
+        appNameLabel: "Nom de la page :",
+        appNamePlaceholder: "Ex : Mon Site Web",
+        appUrlLabel: "URL ou Recherche :",
+        appIconLabel: "Icône / Emoji :",
+        cancelBtn: "Annuler",
+        confirmInstallBtn: "Enregistrer",
+        pwaAvailable: "OCS Browser peut être installé comme application native sur votre système !",
+        installNativeBtn: "Installer OCS Browser sur PC/Mobile",
+        welcomeTitle: "Bienvenue sur OCS Browser ! 👋",
+        welcomeDesc: "Votre navigateur ultra-léger axé sur le contenu libre, la confidentialité et la navigation sécurisée.",
+        welcomeFeature1: "⚡ <b>OSC Search :</b> Résultats et informations libres de droits.",
+        welcomeFeature2: "🚫 <b>AdBlock + Anti-Traqueur :</b> Navigation propre sans publicités ni cookies espions.",
+        welcomeFeature3: "🛡️ <b>Protection Intégrée :</b> Filtre en temps réel contre les téléchargements suspects et les malwares.",
+        welcomeBtn: "Commencer à naviguer ! 🚀",
+        securityTitle: "Centre de Sécurité & AdBlock",
+        statusLabel: "État :",
+        secAdblockLabel: "<b>Bloqueur de Publicités (AdBlock) :</b> Filtre les pop-ups et les domaines publicitaires.",
+        secTrackerLabel: "<b>Bloqueur de Traqueurs :</b> Empêche le suivi de Google Analytics et les pixels espions.",
+        secShieldLabel: "<b>Bouclier Anti-Phishing :</b> Bloque les domaines malveillants et les exécutables dangereux.",
+        secHttpLabel: "<b>Avertir des sites non chiffrés (HTTP) :</b> Alerte si un site n'utilise pas HTTPS.",
+        blockedTotalLabel: "🚫 Total des éléments filtrés :",
+        pinLabel: "🔑 Code PIN de Contrôle Parental / Verrouillage (Optionnel) :",
+        pinPlaceholder: "Entrez un PIN à 4 chiffres",
+        savePinBtn: "Enregistrer le PIN",
+        secStatusSafeDefault: "Connexion chiffrée, AdBlock et protection actifs.",
+        secStatusWarnDefault: "Avertissement : La connexion n'est pas HTTPS.",
+        secStatusDangerDefault: "Danger ! Site suspect ou publicité massive bloqué.",
+        secStatusHome: "Page d'accueil protégée.",
+        secStatusGame: "Mode Jeu Local OCS.",
+        secStatusOsc: "Moteur OSC Search sécurisé (Sans Publicité).",
+        secStatusIncognito: "Vous êtes en mode privé : cookies et historique ne sont pas enregistrés.",
+        secBadgeSafeTitle: "Site sécurisé (HTTPS)",
+        secBadgeWarnTitle: "Attention : Site non chiffré (HTTP)",
+        secBadgeDangerTitle: "Site bloqué pour sécurité",
+        reasonAd: "Le chargement direct d'un domaine publicitaire ({domain}) a été bloqué.",
+        reasonTracker: "Un service de traqueur ({domain}) a été bloqué.",
+        reasonExecutable: "Le téléchargement/l'exécution direct de fichiers dangereux ({ext}) a été bloqué.",
+        reasonPhishing: "Le site contient des motifs suspects de Phishing/Malware (\"{kw}\").",
+        reasonHttpWarn: "Ce site n'utilise pas de connexion HTTPS chiffrée. Vos données pourraient ne pas être protégées.",
+        blockedHeader: "Impossible d'accéder au site, mais vous pouvez jouer à ce mini-jeu",
+        gameHeader: "Plateforme de Parkour OCS 🏃",
+        gameSubHeader: "A/D ou Flèches (Bouger) | Espace/Haut/W (Sauter)",
+        gameControls: "Contrôles : ← → / A D (Bouger) | ESPACE / ↑ / W (Sauter)",
+        gameBackBtn: "Retour à l'Accueil Sécurisé 🏠",
+        gameOverTitle: "VOUS ÊTES TOMBÉ DANS LE VIDE !",
+        gameLevelReached: "Niveau atteint : ",
+        gamePressSpace: " | Appuyez sur Espace pour Redémarrer",
+        gameLevelLabel: "Niveau Parkour : ",
+        incognitoBanner: "🕵️ Vous êtes en mode privé : cookies, historique et connexions sont totalement désactivés.",
+        incognitoHomeTitle: "Mode Privé Incognito",
+        incognitoHomeDesc: "Vous êtes en mode privé, aucun cookie ni historique n'est enregistré ici",
+        incognitoFeature1: "🚫 <b>Cookies et stockage web :</b> Totalement désactivés.",
+        incognitoFeature2: "🚫 <b>Historique de navigation :</b> Aucune activité n'est enregistrée.",
+        incognitoFeature3: "🔒 <b>Connexion :</b> Désactivée pour protéger la vie privée.",
+        incognitoFeature4: "💾 <b>Pages enregistrées :</b> Bloquées en mode privé.",
+        alertPinEnter: "Entrez le code PIN de sécurité pour accéder aux paramètres :",
+        alertPinIncorrect: "Code PIN incorrect.",
+        alertPinSaved: "Code PIN de sécurité enregistré avec succès !",
+        alertPinRemoved: "PIN supprimé.",
+        alertPinDelete: "Entrez le PIN pour supprimer une page enregistrée :",
+        alertIncognitoNoSave: "Vous ne pouvez pas enregistrer de sites en navigation privée.",
+        alertIncognitoNoSaveModal: "Impossible d'enregistrer des sites en mode privé.",
+        alertCompleteFields: "Veuillez remplir le nom et l'URL.",
+        promptBgUrl: "Entrez l'URL de l'image pour l'arrière-plan :",
+        promptTabName: "Entrez le nouveau nom de l'onglet :",
+        promptTabRenameTooltip: "Double-cliquez pour renommer cet onglet",
+        promptFallbackAppName: "Mon Site Web"
       }
     };
 
-    // Configuración de motores de búsqueda
+    function t() { return translations[currentLang] || translations.es; }
+
     const searchEngines = {
       osc: { name: 'OSC Search', url: 'internal', icon: '⚡' },
       google: { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
@@ -850,48 +1230,24 @@
     const bgColorPicker = document.getElementById('bg-color-picker');
     const accentColorPicker = document.getElementById('accent-color-picker');
 
-    /* Generación de pantalla gris para el modo incógnito */
+    /* ============================================================
+       PLANTILLAS HTML INTERNAS — usan t() para traducirse
+       ============================================================ */
+
     function generateIncognitoHomeHTML() {
+      const tr = t();
       return `
         <!DOCTYPE html>
-        <html lang="es">
+        <html lang="${currentLang}">
         <head>
           <meta charset="UTF-8">
           <style>
-            body {
-              margin: 0;
-              height: 100vh;
-              background-color: #2d3748;
-              color: #f7fafc;
-              font-family: system-ui, -apple-system, sans-serif;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              text-align: center;
-              padding: 20px;
-              box-sizing: border-box;
-            }
-            .card {
-              background: #1a202c;
-              border: 1px solid #4a5568;
-              border-radius: 16px;
-              padding: 40px 30px;
-              max-width: 520px;
-              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            }
+            body { margin: 0; height: 100vh; background-color: #2d3748; color: #f7fafc; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
+            .card { background: #1a202c; border: 1px solid #4a5568; border-radius: 16px; padding: 40px 30px; max-width: 520px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
             .icon { font-size: 64px; margin-bottom: 16px; }
             h1 { margin: 0 0 16px 0; font-size: 24px; color: #edf2f7; }
             p { font-size: 16px; color: #cbd5e0; line-height: 1.5; margin: 0 0 24px 0; }
-            ul {
-              text-align: left;
-              background: #2d3748;
-              padding: 16px 20px 16px 36px;
-              border-radius: 10px;
-              font-size: 13px;
-              color: #a0aec0;
-              margin: 0;
-            }
+            ul { text-align: left; background: #2d3748; padding: 16px 20px 16px 36px; border-radius: 10px; font-size: 13px; color: #a0aec0; margin: 0; }
             li { margin-bottom: 8px; }
             li:last-child { margin-bottom: 0; }
           </style>
@@ -899,13 +1255,13 @@
         <body>
           <div class="card">
             <div class="icon">🕵️</div>
-            <h1>Modo Incógnito Privado</h1>
-            <p>Estas en modo incognito, aqui no se guardan cookies ni un solo historial</p>
+            <h1>${tr.incognitoHomeTitle}</h1>
+            <p>${tr.incognitoHomeDesc}</p>
             <ul>
-              <li>🚫 <b>Cookies y almacenamiento web:</b> Totalmente desactivados.</li>
-              <li>🚫 <b>Historial de navegación:</b> No se registra ninguna actividad.</li>
-              <li>🔒 <b>Inicio de sesión:</b> Deshabilitado por protección de privacidad.</li>
-              <li>💾 <b>Webs guardadas:</b> Bloqueadas en modo privado.</li>
+              <li>${tr.incognitoFeature1}</li>
+              <li>${tr.incognitoFeature2}</li>
+              <li>${tr.incognitoFeature3}</li>
+              <li>${tr.incognitoFeature4}</li>
             </ul>
           </div>
         </body>
@@ -913,7 +1269,6 @@
       `;
     }
 
-    /* PWA Prompt */
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -931,7 +1286,7 @@
       }
     }
 
-    /* === CÓDIGO DEL SISTEMA DE SEGURIDAD Y ADBLOCK === */
+    /* === SEGURIDAD Y ADBLOCK === */
     function loadSecurityConfig() {
       const savedSec = localStorage.getItem('ocs_security_config');
       if (savedSec) {
@@ -970,15 +1325,15 @@
       const pinVal = document.getElementById('sec-pin-input').value.trim();
       securityConfig.pin = pinVal;
       localStorage.setItem('ocs_security_config', JSON.stringify(securityConfig));
-      alert(pinVal ? "¡PIN de seguridad guardado correctamente!" : "PIN eliminado.");
+      alert(pinVal ? t().alertPinSaved : t().alertPinRemoved);
       closeSecurityModal();
     }
 
     function openSecurityModal() {
       if (securityConfig.pin) {
-        const enteredPin = prompt("Ingresa el PIN de seguridad para acceder a la configuración:");
+        const enteredPin = prompt(t().alertPinEnter);
         if (enteredPin !== securityConfig.pin) {
-          alert("PIN incorrecto.");
+          alert(t().alertPinIncorrect);
           return;
         }
       }
@@ -990,6 +1345,7 @@
     }
 
     function updateSecurityBadge(status, customMsg = '') {
+      const tr = t();
       const badge = document.getElementById('security-badge');
       const statusText = document.getElementById('security-status-text');
       const statusBox = document.getElementById('security-status-box');
@@ -997,8 +1353,8 @@
       if (status === 'safe') {
         badge.innerHTML = '🛡️';
         badge.style.color = '#10b981';
-        badge.title = 'Sitio seguro (HTTPS)';
-        if (statusText) statusText.textContent = customMsg || 'Conexión cifrada, AdBlock y protección activa.';
+        badge.title = tr.secBadgeSafeTitle;
+        if (statusText) statusText.textContent = customMsg || tr.secStatusSafeDefault;
         if (statusBox) {
           statusBox.style.background = 'rgba(16, 185, 129, 0.2)';
           statusBox.style.borderColor = '#10b981';
@@ -1007,8 +1363,8 @@
       } else if (status === 'warn') {
         badge.innerHTML = '⚠️';
         badge.style.color = '#f59e0b';
-        badge.title = 'Precaución: Sitio no cifrado (HTTP)';
-        if (statusText) statusText.textContent = customMsg || 'Advertencia: La conexión no es HTTPS.';
+        badge.title = tr.secBadgeWarnTitle;
+        if (statusText) statusText.textContent = customMsg || tr.secStatusWarnDefault;
         if (statusBox) {
           statusBox.style.background = 'rgba(245, 158, 11, 0.2)';
           statusBox.style.borderColor = '#f59e0b';
@@ -1017,8 +1373,8 @@
       } else if (status === 'danger') {
         badge.innerHTML = '🛑';
         badge.style.color = '#ef4444';
-        badge.title = 'Sitio bloqueado por seguridad';
-        if (statusText) statusText.textContent = customMsg || '¡Peligro! Sitio sospechoso o de anuncios masivos bloqueado.';
+        badge.title = tr.secBadgeDangerTitle;
+        if (statusText) statusText.textContent = customMsg || tr.secStatusDangerDefault;
         if (statusBox) {
           statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
           statusBox.style.borderColor = '#ef4444';
@@ -1029,155 +1385,93 @@
 
     function evaluateUrlSecurity(url) {
       if (!url || url.startsWith('osc://')) return { status: 'safe', reason: '' };
-
+      const tr = t();
       const lowerUrl = url.toLowerCase();
 
-      // 1. Filtrar dominios directos de publicidad si AdBlock está activo
-      if (securityConfig.adBlockEnabled) {
-        for (let adDomain of adDomains) {
-          if (lowerUrl.includes(adDomain)) {
-            incrementBlockedCount();
-            return { status: 'danger', reason: `Se ha bloqueado la carga directa de un dominio publicitario (${adDomain}).` };
-          }
-        }
-      }
+      // NO bloqueamos la navegación principal por dominios de ads/rastreadores.
+      // El filtrado real se hace dentro del proxy. Aquí solo bloqueamos
+      // ejecutables peligrosos y phishing.
 
-      // 2. Filtrar rastreadores conocidos si el anti-tracker está activo
-      if (securityConfig.trackerBlockEnabled) {
-        for (let trDomain of trackerDomains) {
-          if (lowerUrl.includes(trDomain)) {
-            incrementBlockedCount();
-            return { status: 'danger', reason: `Se ha bloqueado un servicio de rastreo de actividad (${trDomain}).` };
-          }
-        }
-      }
-
-      // 3. Verificar extensiones peligrosas
       if (securityConfig.blockExecutables) {
         for (let ext of dangerousExtensions) {
           if (lowerUrl.endsWith(ext) || lowerUrl.includes(ext + '?')) {
-            return { status: 'danger', reason: `Se ha bloqueado la descarga/ejecución directa de archivos peligrosos (${ext}).` };
+            return { status: 'danger', reason: tr.reasonExecutable.replace('{ext}', ext) };
           }
         }
       }
 
-      // 4. Escudo contra dominios o términos de phishing
       if (securityConfig.shieldEnabled) {
         for (let kw of suspiciousKeywords) {
           if (lowerUrl.includes(kw)) {
-            return { status: 'danger', reason: `El sitio contiene patrones sospechosos o posibles amenazas de Phishing/Malware ("${kw}").` };
+            return { status: 'danger', reason: tr.reasonPhishing.replace('{kw}', kw) };
           }
         }
       }
 
-      // 5. Advertencia de sitios HTTP no seguros
       if (securityConfig.warnHttp && lowerUrl.startsWith('http://')) {
-        return { status: 'warn', reason: 'Este sitio web no utiliza una conexión cifrada HTTPS. Tus datos podrían no estar protegidos.' };
+        return { status: 'warn', reason: tr.reasonHttpWarn };
       }
 
-      // Si la web carga normalmente, simular filtrado de rastreadores/banners internos
-      if (securityConfig.adBlockEnabled || securityConfig.trackerBlockEnabled) {
+      if ((securityConfig.adBlockEnabled || securityConfig.trackerBlockEnabled)
+          && (lowerUrl.startsWith('http://') || lowerUrl.startsWith('https://'))) {
         incrementBlockedCount(Math.floor(Math.random() * 3) + 1);
       }
 
       return { status: 'safe', reason: '' };
     }
 
-    function generateParkourGameHTML(headerText = 'Plataforma de Parkour Minimalista 🏃', reasonText = 'Usa A/D o Flechas para moverte | Espacio, W o Arriba para Saltar') {
+    function generateParkourGameHTML(customHeader, customSubheader) {
+      const tr = t();
+      const header = customHeader || tr.gameHeader;
+      const subheader = customSubheader || tr.gameSubHeader;
+      // Pasamos textos traducidos al JS interno vía JSON
+      const S = JSON.stringify({
+        controls: tr.gameControls,
+        backBtn: tr.gameBackBtn,
+        over: tr.gameOverTitle,
+        levelReached: tr.gameLevelReached,
+        pressSpace: tr.gamePressSpace,
+        levelLabel: tr.gameLevelLabel
+      });
       return `
         <!DOCTYPE html>
-        <html>
+        <html lang="${currentLang}">
         <head>
           <meta charset="UTF-8">
           <style>
-            body { 
-              font-family: sans-serif; 
-              background: #0c0f17; 
-              color: white; 
-              display: flex; 
-              flex-direction: column;
-              justify-content: center; 
-              align-items: center; 
-              height: 100vh; 
-              margin: 0; 
-              text-align: center; 
-              overflow: hidden;
-            }
-            .header-text { 
-              color: #10b981; 
-              font-size: 20px; 
-              font-weight: bold; 
-              margin-bottom: 6px;
-              text-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
-            }
-            .reason-text {
-              color: #cbd5e1;
-              font-size: 12px;
-              margin-bottom: 12px;
-            }
-            canvas {
-              background: #111827;
-              border: 2px solid #3b82f6;
-              border-radius: 12px;
-              box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-            }
-            .controls-info {
-              font-size: 11px;
-              color: #94a3b8;
-              margin-top: 8px;
-            }
-            button { 
-              margin-top: 10px;
-              background: #334155; 
-              color: white; 
-              border: none; 
-              padding: 8px 16px; 
-              border-radius: 8px; 
-              font-weight: bold; 
-              cursor: pointer; 
-              transition: background 0.2s; 
-            }
+            body { font-family: sans-serif; background: #0c0f17; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; }
+            .header-text { color: #10b981; font-size: 20px; font-weight: bold; margin-bottom: 6px; text-shadow: 0 2px 10px rgba(16, 185, 129, 0.3); }
+            .reason-text { color: #cbd5e1; font-size: 12px; margin-bottom: 12px; }
+            canvas { background: #111827; border: 2px solid #3b82f6; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); }
+            .controls-info { font-size: 11px; color: #94a3b8; margin-top: 8px; }
+            button { margin-top: 10px; background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
             button:hover { background: #475569; }
           </style>
         </head>
         <body>
-          <div class="header-text">${headerText}</div>
-          <div class="reason-text">${reasonText}</div>
+          <div class="header-text">${header}</div>
+          <div class="reason-text">${subheader}</div>
           <canvas id="gameCanvas" width="650" height="300"></canvas>
-          <div class="controls-info">Controles: ← → / A D (Mover) | ESPACIO / ↑ / W (Salta)</div>
-          <button onclick="window.parent.goHome()">Volver al Inicio Seguro 🏠</button>
-
+          <div class="controls-info">${tr.gameControls}</div>
+          <button id="btnBack">${tr.gameBackBtn}</button>
           <script>
+            var S = ${S};
+            document.getElementById('btnBack').addEventListener('click', function(){
+              try { window.top.goHome(); } catch(e) { window.parent.goHome(); }
+            });
+
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
-
             let level = 1;
             let gameOver = false;
-            let levelComplete = false;
-
-            let keys = { left: false, right: false, up: false };
-
-            let player = {
-              x: 30,
-              y: 200,
-              width: 22,
-              height: 22,
-              velocityX: 0,
-              velocityY: 0,
-              speed: 3.8,
-              gravity: 0.5,
-              jumpPower: -9.5,
-              isGrounded: false
-            };
-
+            let keys = { left: false, right: false };
+            let player = { x: 30, y: 200, width: 22, height: 22, velocityX: 0, velocityY: 0, speed: 3.8, gravity: 0.5, jumpPower: -9.5, isGrounded: false };
             let goal = { x: 580, y: 50, width: 25, height: 35 };
-
             let platforms = [];
 
             function generatePlatforms() {
               platforms = [];
               platforms.push({ x: 20, y: 260, width: 100, height: 15 });
-
               if (level === 1) {
                 platforms.push({ x: 150, y: 220, width: 80, height: 15 });
                 platforms.push({ x: 270, y: 180, width: 80, height: 15 });
@@ -1190,16 +1484,13 @@
                 platforms.push({ x: 450, y: 120, width: 60, height: 15 });
                 platforms.push({ x: 550, y: 90, width: 80, height: 15 });
               } else {
-                let lastX = 130;
-                let lastY = 230;
+                let lastX = 130, lastY = 230;
                 for (let i = 0; i < 5; i++) {
                   let width = Math.max(35, 70 - level * 3);
                   let gapX = Math.floor(Math.random() * 30) + 75;
                   let gapY = Math.floor(Math.random() * 40) - 20;
-                  
                   lastX += gapX;
                   lastY = Math.max(80, Math.min(250, lastY + gapY));
-                  
                   if (lastX > canvas.width - 100) break;
                   platforms.push({ x: lastX, y: lastY, width: width, height: 15 });
                 }
@@ -1210,30 +1501,21 @@
             }
 
             function resetPlayer() {
-              player.x = 30;
-              player.y = 200;
-              player.velocityX = 0;
-              player.velocityY = 0;
+              player.x = 30; player.y = 200;
+              player.velocityX = 0; player.velocityY = 0;
               player.isGrounded = false;
             }
 
             function resetGame() {
-              level = 1;
-              gameOver = false;
-              levelComplete = false;
-              generatePlatforms();
-              resetPlayer();
-              animate();
+              level = 1; gameOver = false;
+              generatePlatforms(); resetPlayer(); animate();
             }
 
             window.addEventListener('keydown', (e) => {
               if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
               if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
               if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-                if (gameOver) {
-                  resetGame();
-                  return;
-                }
+                if (gameOver) { resetGame(); return; }
                 if (player.isGrounded) {
                   player.velocityY = player.jumpPower;
                   player.isGrounded = false;
@@ -1253,57 +1535,38 @@
                 ctx.fillStyle = '#ef4444';
                 ctx.font = 'bold 24px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('¡CAÍSTE AL VACÍO!', canvas.width / 2, canvas.height / 2 - 10);
+                ctx.fillText(S.over, canvas.width / 2, canvas.height / 2 - 10);
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '14px sans-serif';
-                ctx.fillText('Nivel alcanzado: ' + level + ' | Presiona Espacio para Reiniciar', canvas.width / 2, canvas.height / 2 + 20);
+                ctx.fillText(S.levelReached + level + S.pressSpace, canvas.width / 2, canvas.height / 2 + 20);
                 return;
               }
-
               ctx.clearRect(0, 0, canvas.width, canvas.height);
-
               if (keys.left) player.velocityX = -player.speed;
               else if (keys.right) player.velocityX = player.speed;
               else player.velocityX = 0;
-
               player.velocityY += player.gravity;
-
               player.x += player.velocityX;
               player.y += player.velocityY;
-
               if (player.x < 0) player.x = 0;
               if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-
-              if (player.y > canvas.height) {
-                gameOver = true;
-              }
-
+              if (player.y > canvas.height) gameOver = true;
               player.isGrounded = false;
               for (let plat of platforms) {
-                if (
-                  player.x + player.width > plat.x &&
-                  player.x < plat.x + plat.width &&
-                  player.y + player.height >= plat.y &&
-                  player.y + player.height <= plat.y + plat.height + player.velocityY &&
-                  player.velocityY >= 0
-                ) {
+                if (player.x + player.width > plat.x && player.x < plat.x + plat.width &&
+                    player.y + player.height >= plat.y && player.y + player.height <= plat.y + plat.height + player.velocityY &&
+                    player.velocityY >= 0) {
                   player.y = plat.y - player.height;
                   player.velocityY = 0;
                   player.isGrounded = true;
                 }
               }
-
-              if (
-                player.x < goal.x + goal.width &&
-                player.x + player.width > goal.x &&
-                player.y < goal.y + goal.height &&
-                player.y + player.height > goal.y
-              ) {
+              if (player.x < goal.x + goal.width && player.x + player.width > goal.x &&
+                  player.y < goal.y + goal.height && player.y + player.height > goal.y) {
                 level++;
                 generatePlatforms();
                 resetPlayer();
               }
-
               ctx.fillStyle = '#334155';
               ctx.strokeStyle = '#3b82f6';
               ctx.lineWidth = 2;
@@ -1311,28 +1574,23 @@
                 ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
                 ctx.strokeRect(plat.x, plat.y, plat.width, plat.height);
               }
-
               ctx.fillStyle = '#f59e0b';
               ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
               ctx.fillStyle = '#ffffff';
               ctx.font = '16px sans-serif';
               ctx.textAlign = 'center';
               ctx.fillText('🏁', goal.x + goal.width / 2, goal.y + 22);
-
               ctx.fillStyle = '#10b981';
               ctx.fillRect(player.x, player.y, player.width, player.height);
               ctx.strokeStyle = '#6ee7b7';
               ctx.lineWidth = 2;
               ctx.strokeRect(player.x, player.y, player.width, player.height);
-
               ctx.fillStyle = '#ffffff';
               ctx.font = 'bold 14px sans-serif';
               ctx.textAlign = 'left';
-              ctx.fillText('Nivel Parkour: ' + level, 15, 25);
-
+              ctx.fillText(S.levelLabel + level, 15, 25);
               requestAnimationFrame(animate);
             }
-
             generatePlatforms();
             animate();
           <\/script>
@@ -1342,13 +1600,9 @@
     }
 
     function generateBlockedPageHTML(targetUrl, reason) {
-      return generateParkourGameHTML(
-        'No se puede acceder a la web, pero puedes jugar este minijuego',
-        reason
-      );
+      return generateParkourGameHTML(t().blockedHeader, reason);
     }
 
-    /* === MANEJO DE PRIMERA VISITA / BIENVENIDA === */
     function checkFirstVisit() {
       const welcomeSeen = localStorage.getItem('ocs_welcome_seen');
       if (!welcomeSeen) {
@@ -1361,7 +1615,6 @@
       localStorage.setItem('ocs_welcome_seen', 'true');
     }
 
-    /* === GUARDADO Y CARGA CON LOCALSTORAGE === */
     function loadSettings() {
       loadSecurityConfig();
 
@@ -1392,41 +1645,103 @@
       checkFirstVisit();
     }
 
+    /* ============================================================
+       CAMBIO DE IDIOMA — actualiza ABSOLUTAMENTE TODO
+       ============================================================ */
     function changeLanguage(langKey) {
+      if (!translations[langKey]) return;
       currentLang = langKey;
       localStorage.setItem('ocs_lang', langKey);
+      document.documentElement.lang = langKey;
 
-      const t = translations[langKey];
+      const tr = t();
 
+      // 1) data-i18n → innerHTML
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (t[key]) el.innerHTML = t[key];
+        if (tr[key] !== undefined) el.innerHTML = tr[key];
       });
-
+      // 2) data-i18n-title → title
       document.querySelectorAll('[data-i18n-title]').forEach(el => {
         const key = el.getAttribute('data-i18n-title');
-        if (t[key]) el.title = t[key];
+        if (tr[key] !== undefined) el.title = tr[key];
+      });
+      // 3) data-i18n-placeholder → placeholder
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (tr[key] !== undefined) el.placeholder = tr[key];
       });
 
-      urlInput.placeholder = t.urlPlaceholder;
+      // 4) Placeholders dinámicos
+      urlInput.placeholder = tr.urlPlaceholder;
       changeSearchEngine(currentEngine);
 
-      tabs.forEach(tab => {
-        if (!tab.isCustomTitle && (tab.title === translations.es.newTabDefault || tab.title === translations.en.newTabDefault)) {
-          tab.title = t.newTabDefault;
+      // 5) Renombrar pestañas según su tipo
+      applyTabTitlesForLanguage();
+
+      // 6) Banner de incógnito
+      const banner = document.getElementById('incognito-banner');
+      if (banner) banner.textContent = tr.incognitoBanner;
+
+      // 7) Recargar contenido interno si contiene HTML generado
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab) {
+        const st = activeTab.history[activeTab.historyIndex];
+        if (st) {
+          if (st.type === 'game' || st.type === 'osc') {
+            activeTab.loadedHistoryIndex = -1;
+            loadHistoryState(activeTab, st);
+          } else if (st.type === 'home') {
+            if (activeTab.incognito) {
+              activeTab.loadedHistoryIndex = -1;
+              loadHistoryState(activeTab, st);
+            } else {
+              updateSecurityBadge('safe', tr.secStatusHome);
+            }
+          } else if (st.type === 'web') {
+            const secEval = evaluateUrlSecurity(st.url);
+            updateSecurityBadge(secEval.status, secEval.reason);
+          }
         }
+      }
+
+      // 8) Contador y título del AdBlock
+      updateAdblockUI();
+
+      // 9) Grilla de webs guardadas (por si muestra el "vacío")
+      renderAppsGrid();
+
+      // 10) Actualizar UI incógnito (tooltip del botón guardar, etc.)
+      if (typeof actualizarUiIncognito === 'function') actualizarUiIncognito();
+    }
+
+    function applyTabTitlesForLanguage() {
+      const tr = t();
+      tabs.forEach(tab => {
+        if (tab.isCustomTitle) return;
+        if (tab.incognito) {
+          tab.title = tr.incognitoTabLabel;
+          return;
+        }
+        const st = tab.history[tab.historyIndex];
+        if (!st) return;
+        if (st.type === 'home') {
+          tab.title = tr.newTabDefault;
+        } else if (st.type === 'game') {
+          tab.title = tr.gameTabTitle;
+        } else if (st.type === 'osc') {
+          tab.title = tr.oscTabPrefix + ' ' + st.query;
+        }
+        // web → conserva dominio, no se traduce
       });
       renderTabs();
-      renderAppsGrid();
     }
 
     function changeSearchEngine(engineKey) {
       currentEngine = engineKey;
       localStorage.setItem('ocs_engine', engineKey);
-
       const engine = searchEngines[engineKey];
-      const t = translations[currentLang];
-      searchInput.placeholder = t.searchPlaceholder.replace('{engine}', engine.name);
+      searchInput.placeholder = t().searchPlaceholder.replace('{engine}', engine.name);
     }
 
     function createNewTab(input = '') {
@@ -1441,13 +1756,13 @@
       const defaultHomeState = {
         type: 'home',
         url: '',
-        title: translations[currentLang].newTabDefault
+        title: t().newTabDefault
       };
 
       const tabObj = {
         id: id,
         url: '',
-        title: translations[currentLang].newTabDefault,
+        title: t().newTabDefault,
         isCustomTitle: false,
         iframeEl: iframe,
         history: [defaultHomeState],
@@ -1460,9 +1775,7 @@
       renderTabs();
       switchTab(id);
 
-      if (input) {
-        openUrl(input);
-      }
+      if (input) openUrl(input);
     }
 
     function switchTab(id) {
@@ -1478,14 +1791,11 @@
       updateNavButtons();
     }
 
-    /* Manejo del Historial y Navegación con Filtro de Seguridad */
     function loadHistoryState(tab, state) {
+      const tr = t();
       tab.url = state.url;
-      if (!tab.isCustomTitle) {
-        tab.title = state.title;
-      }
+      if (!tab.isCustomTitle) tab.title = state.title;
 
-      // Si es una pestaña de incógnito, se aplica aislamiento de cookies y sesiones
       if (tab.incognito) {
         tab.iframeEl.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups');
       } else {
@@ -1504,23 +1814,23 @@
           }
           tab.iframeEl.style.display = 'block';
           urlInput.value = '';
-          updateSecurityBadge('safe', 'Estas en modo incognito, aqui no se guardan cookies ni un solo historial');
+          updateSecurityBadge('safe', tr.secStatusIncognito);
         } else {
           homeScreen.style.display = 'flex';
           tab.iframeEl.style.display = 'none';
           urlInput.value = '';
-          updateSecurityBadge('safe', 'Página de inicio protegida.');
+          updateSecurityBadge('safe', tr.secStatusHome);
         }
       } else if (state.type === 'game') {
         homeScreen.style.display = 'none';
         if (!isAlreadyLoaded) {
           tab.iframeEl.removeAttribute('src');
-          tab.iframeEl.srcdoc = generateParkourGameHTML('Plataforma de Parkour OCS 🏃', 'A/D o Flechas (Mover) | Espacio/Arriba/W (Saltar)');
+          tab.iframeEl.srcdoc = generateParkourGameHTML();
           tab.loadedHistoryIndex = tab.historyIndex;
         }
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
-        updateSecurityBadge('safe', 'Modo Juego Local OCS.');
+        updateSecurityBadge('safe', tr.secStatusGame);
       } else if (state.type === 'osc') {
         homeScreen.style.display = 'none';
         if (!isAlreadyLoaded) {
@@ -1530,7 +1840,7 @@
         }
         tab.iframeEl.style.display = 'block';
         urlInput.value = state.url;
-        updateSecurityBadge('safe', 'Motor OSC Search seguro (Sin Anuncios).');
+        updateSecurityBadge('safe', tr.secStatusOsc);
       } else {
         const secEval = evaluateUrlSecurity(state.url);
         updateSecurityBadge(secEval.status, secEval.reason);
@@ -1613,7 +1923,7 @@
       const tab = tabs.find(t => t.id === id);
       if (!tab) return;
 
-      const newTitle = prompt("Escribe el nuevo nombre de la pestaña:", tab.title);
+      const newTitle = prompt(t().promptTabName, tab.title);
       if (newTitle !== null && newTitle.trim() !== "") {
         tab.title = newTitle.trim();
         tab.isCustomTitle = true;
@@ -1632,7 +1942,7 @@
         const titleEl = document.createElement('span');
         titleEl.className = 'tab-title';
         titleEl.textContent = tab.title;
-        titleEl.title = "Haz doble clic para renombrar esta pestaña";
+        titleEl.title = t().promptTabRenameTooltip;
         titleEl.ondblclick = (e) => renameTab(tab.id, e);
 
         const closeBtn = document.createElement('span');
@@ -1646,11 +1956,10 @@
       });
     }
 
-    /* SISTEMA DE WEBS GUARDADAS */
     function openInstallModal() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && activeTab.incognito) {
-        alert("No puedes guardar webs mientras navegas en modo incógnito.");
+        alert(t().alertIncognitoNoSave);
         return;
       }
 
@@ -1659,7 +1968,7 @@
       const iconInput = document.getElementById('app-icon-input');
 
       if (activeTab && activeTab.url) {
-        nameInput.value = activeTab.title || 'Mi Sitio Web';
+        nameInput.value = activeTab.title || t().promptFallbackAppName;
         urlInputModal.value = activeTab.url;
         iconInput.value = getEmojiForUrl(activeTab.url);
       } else {
@@ -1681,7 +1990,7 @@
     function saveInstalledApp() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && activeTab.incognito) {
-        alert("No se pueden guardar webs en modo incógnito.");
+        alert(t().alertIncognitoNoSaveModal);
         closeInstallModal();
         return;
       }
@@ -1691,7 +2000,7 @@
       const icon = document.getElementById('app-icon-input').value.trim() || '🌐';
 
       if (!name || !url) {
-        alert("Por favor completa el nombre y la URL.");
+        alert(t().alertCompleteFields);
         return;
       }
 
@@ -1706,9 +2015,9 @@
     function deleteApp(appId, e) {
       e.stopPropagation();
       if (securityConfig.pin) {
-        const pin = prompt("Ingresa el PIN para eliminar una web guardada:");
+        const pin = prompt(t().alertPinDelete);
         if (pin !== securityConfig.pin) {
-          alert("PIN incorrecto.");
+          alert(t().alertPinIncorrect);
           return;
         }
       }
@@ -1746,7 +2055,7 @@
       container.innerHTML = '';
 
       if (installedApps.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; text-align: center; padding: 10px;">${translations[currentLang].emptyApps}</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; color: #94a3b8; font-size: 12px; text-align: center; padding: 10px;">${t().emptyApps}</div>`;
         return;
       }
 
@@ -1766,11 +2075,14 @@
     }
 
     function generateOscSearchHTML(query) {
-      const t = translations[currentLang];
+      const tr = t();
+      const q = (query || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const qEnc = encodeURIComponent(query || '');
       return `
         <!DOCTYPE html>
-        <html>
+        <html lang="${currentLang}">
         <head>
+          <meta charset="UTF-8">
           <style>
             body { font-family: sans-serif; background: #0c0f17; color: white; padding: 40px; }
             h1 { color: #3b82f6; display: flex; align-items: center; gap: 10px; }
@@ -1784,31 +2096,31 @@
           </style>
         </head>
         <body>
-          <h1>⚡ OSC Search (Sin Publicidad)</h1>
-          <div class="query">${t.oscTitle} <strong>"${query}"</strong></div>
+          <h1>${tr.oscHeader}</h1>
+          <div class="query">${tr.oscTitle} <strong>"${q}"</strong></div>
 
           <div class="result-card">
-            <span class="tag">Open Source / Wiki</span>
-            <h3><a href="https://es.wikipedia.org/wiki/${encodeURIComponent(query)}" target="_self">Wikipedia: ${query}</a></h3>
-            <p>${t.wikiDesc}</p>
+            <span class="tag">${tr.oscTagOpenSource}</span>
+            <h3><a href="https://es.wikipedia.org/wiki/${qEnc}" target="_self">Wikipedia: ${q}</a></h3>
+            <p>${tr.wikiDesc}</p>
           </div>
 
           <div class="result-card">
-            <span class="tag">Dominio Público</span>
-            <h3><a href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(query)}" target="_self">Wikimedia Commons - Medios de "${query}"</a></h3>
-            <p>${t.commonsDesc}</p>
+            <span class="tag">${tr.oscTagPublicDomain}</span>
+            <h3><a href="https://commons.wikimedia.org/w/index.php?search=${qEnc}" target="_self">Wikimedia Commons - "${q}"</a></h3>
+            <p>${tr.commonsDesc}</p>
           </div>
 
           <div class="result-card">
-            <span class="tag">Búsqueda Abierta</span>
-            <h3><a href="https://openverse.org/search/?q=${encodeURIComponent(query)}" target="_self">Openverse - Recursos CC</a></h3>
-            <p>${t.openverseDesc}</p>
+            <span class="tag">${tr.oscTagOpenSearch}</span>
+            <h3><a href="https://openverse.org/search/?q=${qEnc}" target="_self">Openverse</a></h3>
+            <p>${tr.openverseDesc}</p>
           </div>
 
           <div class="result-card">
-            <span class="tag">Archivos Libres</span>
-            <h3><a href="https://archive.org/details/texts?query=${encodeURIComponent(query)}" target="_self">Internet Archive - Bibliotecas de "${query}"</a></h3>
-            <p>${t.archiveDesc}</p>
+            <span class="tag">${tr.oscTagFreeFiles}</span>
+            <h3><a href="https://archive.org/details/texts?query=${qEnc}" target="_self">Internet Archive - "${q}"</a></h3>
+            <p>${tr.archiveDesc}</p>
           </div>
         </body>
         </html>
@@ -1826,7 +2138,7 @@
         newState = {
           type: 'game',
           url: 'osc://parkourgame',
-          title: '🏃 Minijuego Parkour'
+          title: t().gameTabTitle
         };
       } else if (/^https?:\/\//i.test(trimmed)) {
         newState = { type: 'web', url: trimmed, title: getDomainOrQuery(input, trimmed) };
@@ -1839,7 +2151,7 @@
           newState = {
             type: 'osc',
             url: 'osc://search?q=' + encodeURIComponent(trimmed),
-            title: `⚡ ${trimmed}`,
+            title: t().oscTabPrefix + ' ' + trimmed,
             query: trimmed
           };
         } else {
@@ -1880,7 +2192,7 @@
         const homeState = {
           type: 'home',
           url: '',
-          title: activeTab.incognito ? '🕵️ Incógnito' : translations[currentLang].newTabDefault
+          title: activeTab.incognito ? t().incognitoTabLabel : t().newTabDefault
         };
 
         activeTab.history = activeTab.history.slice(0, activeTab.historyIndex + 1);
@@ -1906,7 +2218,6 @@
       }
     }
 
-    /* Ajustes Visuales de Fondo */
     function setBgFile(event) {
       const file = event.target.files[0];
       if (file) {
@@ -1925,7 +2236,7 @@
     }
 
     function setBgUrl() {
-      const url = prompt(translations[currentLang].promptBgUrl);
+      const url = prompt(t().promptBgUrl);
       if (url && url.trim() !== '') {
         const bgVal = `url('${url.trim()}')`;
         homeScreen.style.backgroundImage = bgVal;
@@ -1938,7 +2249,6 @@
       localStorage.removeItem('ocs_bg_image');
     }
 
-    /* Personalización de color */
     function updateMenuColor(color) {
       document.documentElement.style.setProperty('--menu-bg', color);
       bgColorPicker.value = color;
@@ -1956,7 +2266,6 @@
       updateAccentColor(accentColor);
     }
 
-    /* Eventos teclado */
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && searchInput.value.trim()) {
         openUrl(searchInput.value.trim());
@@ -1968,7 +2277,6 @@
       if (e.key === 'Enter') navigate();
     });
 
-    // Inicializar navegador y cargar configuraciones
     createNewTab();
     loadSettings();
   </script>
@@ -1978,27 +2286,14 @@
     (function () {
       'use strict';
 
-      const incognitoText = {
-        es: {
-          tabTitle: '🕵️ Incógnito',
-          banner: '🕵️ Estás en modo incógnito: no se guardan cookies, no se guarda historial y no se puede iniciar sesión.',
-          saveBlocked: 'No puedes guardar webs mientras navegas en modo incógnito.'
-        },
-        en: {
-          tabTitle: '🕵️ Incognito',
-          banner: "🕵️ You're in incognito mode: cookies, history, and logins are completely disabled.",
-          saveBlocked: "You can't save websites while browsing in incognito mode."
-        }
-      };
-      function t() { return incognitoText[currentLang] || incognitoText.es; }
-
       window.createIncognitoTab = function (input) {
         createNewTab(input || '');
         const tab = tabs.find(x => x.id === activeTabId);
         if (tab) {
           tab.incognito = true;
-          tab.title = t().tabTitle;
-          if (tab.history && tab.history[0]) tab.history[0].title = t().tabTitle;
+          tab.title = t().incognitoTabLabel;
+          if (tab.history && tab.history[0]) tab.history[0].title = t().incognitoTabLabel;
+          tab.loadedHistoryIndex = -1;
           loadHistoryState(tab, tab.history[tab.historyIndex]);
         }
         renderTabs();
@@ -2010,17 +2305,17 @@
         return !!(tab && tab.incognito);
       }
 
-      function actualizarUiIncognito() {
+      window.actualizarUiIncognito = function () {
         const activa = activeEsIncognito();
         document.body.classList.toggle('incognito-mode', activa);
 
         const banner = document.getElementById('incognito-banner');
-        if (banner) banner.textContent = t().banner;
+        if (banner) banner.textContent = t().incognitoBanner;
 
         const installBtn = document.getElementById('btn-install');
         if (installBtn) {
           installBtn.disabled = activa;
-          installBtn.title = activa ? t().saveBlocked : (translations[currentLang]?.installAppTitle || 'Guardar web');
+          installBtn.title = activa ? t().alertIncognitoNoSave : t().installAppTitle;
         }
 
         if (typeof tabsContainer !== 'undefined' && tabsContainer) {
@@ -2030,7 +2325,7 @@
             if (nodo) nodo.classList.toggle('tab-incognito', !!tb.incognito);
           });
         }
-      }
+      };
 
       setInterval(actualizarUiIncognito, 250);
 
@@ -2038,7 +2333,7 @@
         if (e.target && e.target.closest && e.target.closest('#btn-install')) {
           if (activeEsIncognito()) {
             closeInstallModal();
-            alert(t().saveBlocked);
+            alert(t().alertIncognitoNoSave);
           }
         }
       }, true);
