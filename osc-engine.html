@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OSC Engine - Motor de búsqueda de contenido libre sin anuncios">
+  <meta name="theme-color" content="#3b82f6">
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22OSC%20Engine%22%2C%22short_name%22%3A%22OSC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230c0f17%22%2C%22theme_color%22%3A%22%233b82f6%22%7D">
   <title>OSC Engine - Core Search Engine</title>
   <style>
-    :root {
+    /* ============ [1] VARIABLES DE TEMA (dark/light) ============ */
+    :root, [data-theme="dark"] {
       --bg-dark: #0c0f17;
       --card-bg: #1a2234;
       --border-color: #334155;
@@ -14,14 +18,41 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --shield-color: #10b981;
+      --highlight: #fbbf24;
+      --shadow: rgba(0,0,0,0.5);
+      --skeleton: #1e293b;
+    }
+    [data-theme="light"] {
+      --bg-dark: #f1f5f9;
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --accent-color: #2563eb;
+      --accent-cyan: #0891b2;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shield-color: #059669;
+      --highlight: #d97706;
+      --shadow: rgba(0,0,0,0.1);
+      --skeleton: #e2e8f0;
+    }
+
+    /* ============ [49] REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+
+    /* ============ [45] TAMAÑO DE FUENTE AJUSTABLE ============ */
+    html { font-size: var(--base-font, 16px); }
 
     body {
       background-color: var(--bg-dark);
@@ -29,9 +60,24 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s, color 0.3s;
     }
 
-    /* Encabezado del Motor */
+    /* ============ [47] SKIP LINK ============ */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--accent-color);
+      color: white;
+      padding: 8px 16px;
+      z-index: 9999;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ============ [20] HEADER STICKY ============ */
     header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
@@ -41,7 +87,13 @@
       justify-content: space-between;
       gap: 20px;
       flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      transition: box-shadow 0.3s, background 0.3s;
     }
+    header.scrolled { box-shadow: 0 4px 20px var(--shadow); }
 
     .brand {
       display: flex;
@@ -49,28 +101,59 @@
       gap: 10px;
       font-size: 1.3rem;
       font-weight: 800;
-      color: var(--accent-color);
       letter-spacing: -0.5px;
+      cursor: pointer;
+      user-select: none;
     }
-
     .brand span {
       background: linear-gradient(135deg, var(--accent-color), var(--accent-cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    /* ============ [70] EASTER EGG ANIMATION ============ */
+    @keyframes oscSpin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.3); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    .brand.easter-egg .brand-icon { display: inline-block; animation: oscSpin 1s ease; }
+
+    /* ============ [21] SELECTOR DE MOTOR ============ */
+    .engine-selector {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .engine-selector:hover, .engine-selector:focus { border-color: var(--accent-color); }
+
+    .search-wrapper {
+      flex: 1;
+      max-width: 650px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      position: relative;
     }
 
     .search-box-container {
       flex: 1;
-      max-width: 650px;
       display: flex;
       align-items: center;
       background: var(--bg-dark);
       border: 2px solid var(--border-color);
       border-radius: 50px;
-      padding: 6px 16px;
+      padding: 6px 8px 6px 16px;
       transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
     }
-
     .search-box-container:focus-within {
       border-color: var(--accent-color);
       box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
@@ -83,7 +166,45 @@
       outline: none;
       color: var(--text-main);
       font-size: 1rem;
-      padding: 8px;
+      padding: 8px 4px;
+    }
+    .search-box::placeholder { color: var(--text-muted); }
+
+    /* ============ [17] BOTÓN LIMPIAR ============ */
+    .clear-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 50%;
+      display: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .clear-btn:hover { background: var(--border-color); color: var(--text-main); }
+    .search-box-container.has-value .clear-btn { display: flex; align-items: center; justify-content: center; }
+
+    /* ============ [16] BOTÓN DE VOZ ============ */
+    .voice-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+    .voice-btn:hover { background: var(--border-color); color: var(--accent-color); }
+    .voice-btn.listening {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
     }
 
     .engine-btn {
@@ -94,22 +215,95 @@
       border-radius: 20px;
       font-weight: bold;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .engine-btn:hover { opacity: 0.9; }
+    .engine-btn:active { transform: scale(0.97); }
+
+    /* ============ [4] AUTOCOMPLETE / SUGERENCIAS ============ */
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+      box-shadow: 0 8px 30px var(--shadow);
+      display: none;
+      z-index: 50;
+    }
+    .suggestions.show { display: block; }
+    .suggestion-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: background 0.15s;
+    }
+    .suggestion-item:hover, .suggestion-item.active {
+      background: var(--bg-dark);
+      color: var(--text-main);
+    }
+    .suggestion-item .suggestion-icon { font-size: 1rem; }
+    .suggestion-item mark {
+      background: transparent;
+      color: var(--highlight);
+      font-weight: bold;
+    }
+    .suggestion-section-label {
+      padding: 8px 16px 4px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
     }
 
-    .engine-btn:hover {
-      opacity: 0.9;
+    /* ============ [1] BOTONES DE HEADER (tema, fuente, etc.) ============ */
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+    .icon-btn:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
     }
 
-    /* Barra de estado e indicadores */
     .engine-stats {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-size: 0.82rem;
       color: var(--text-muted);
+      flex-wrap: wrap;
     }
-
     .badge {
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid var(--shield-color);
@@ -120,9 +314,11 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      font-size: 0.75rem;
     }
+    [data-theme="light"] .badge { color: #065f46; }
 
-    /* Filtros y Categorías */
+    /* ============ [12] SORT + VISTA ============ */
     .filter-bar {
       padding: 12px 24px;
       display: flex;
@@ -130,7 +326,10 @@
       border-bottom: 1px solid var(--border-color);
       background: rgba(26, 34, 52, 0.4);
       overflow-x: auto;
+      align-items: center;
+      scrollbar-width: thin;
     }
+    [data-theme="light"] .filter-bar { background: rgba(255, 255, 255, 0.6); }
 
     .filter-tag {
       background: var(--card-bg);
@@ -142,15 +341,48 @@
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-
     .filter-tag.active, .filter-tag:hover {
       border-color: var(--accent-color);
-      color: var(--text-main);
+      color: white;
       background: var(--accent-color);
     }
+    /* ============ [33] CONTADOR EN CADA FILTRO ============ */
+    .filter-count {
+      background: rgba(255,255,255,0.2);
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .filter-tag:not(.active) .filter-count {
+      background: var(--bg-dark);
+      color: var(--text-muted);
+    }
 
-    /* Panel Principal de Resultados */
+    .filter-bar-right {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* ============ [12] SELECTOR DE ORDEN ============ */
+    .sort-select {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .sort-select:hover { border-color: var(--accent-color); }
+
     main {
       flex: 1;
       padding: 24px;
@@ -163,6 +395,36 @@
       font-size: 0.88rem;
       color: var(--text-muted);
       margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    /* ============ [10] ANIMACIÓN DEL CONTADOR ============ */
+    .results-info strong { color: var(--accent-color); }
+
+    /* ============ [10] SKELETON LOADER ============ */
+    .skeleton-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .skeleton-line {
+      height: 12px;
+      background: linear-gradient(90deg, var(--skeleton) 25%, var(--border-color) 50%, var(--skeleton) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 70%; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     .result-card {
@@ -171,12 +433,31 @@
       border-radius: 12px;
       padding: 18px;
       margin-bottom: 16px;
-      transition: transform 0.2s, border-color 0.2s;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      animation: fadeIn 0.3s ease;
     }
-
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     .result-card:hover {
       transform: translateY(-2px);
       border-color: var(--accent-color);
+      box-shadow: 0 8px 25px var(--shadow);
+    }
+    /* ============ [42] KEYBOARD FOCUS ============ */
+    .result-card:focus-within {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    .result-card.focused {
+      border-color: var(--highlight);
+      box-shadow: 0 0 0 2px var(--highlight);
+    }
+    /* ============ [27] BOOKMARKED ============ */
+    .result-card.bookmarked {
+      border-left: 3px solid var(--highlight);
     }
 
     .result-header {
@@ -184,8 +465,8 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 6px;
+      flex-wrap: wrap;
     }
-
     .result-type {
       font-size: 0.72rem;
       text-transform: uppercase;
@@ -196,170 +477,742 @@
       color: var(--accent-cyan);
       border: 1px solid rgba(6, 182, 212, 0.3);
     }
-
+    /* ============ [14] FAVICON ============ */
+    .result-favicon {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
     .result-url {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
-      font-family: monospace;
+      font-family: ui-monospace, 'SFMono-Regular', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    /* ============ [19] READ TIME ============ */
+    .read-time {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
     }
 
     .result-title {
       font-size: 1.15rem;
       margin-bottom: 6px;
+      line-height: 1.35;
     }
-
     .result-title a {
-      color: #60a5fa;
+      color: var(--accent-color);
       text-decoration: none;
       font-weight: 600;
     }
-
-    .result-title a:hover {
-      text-decoration: underline;
+    .result-title a:hover { text-decoration: underline; }
+    .result-title a:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+      border-radius: 3px;
     }
 
     .result-snippet {
       font-size: 0.9rem;
-      color: #cbd5e1;
+      color: var(--text-muted);
       line-height: 1.5;
     }
+    /* ============ [6] HIGHLIGHT ============ */
+    .result-snippet mark, .result-title mark {
+      background: rgba(251, 191, 36, 0.3);
+      color: var(--highlight);
+      padding: 0 2px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
 
-    /* Estado de búsqueda vacía */
+    /* ============ [7][27][65] ACCIONES POR RESULTADO ============ */
+    .result-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      opacity: 0.4;
+      transition: opacity 0.2s;
+    }
+    .result-card:hover .result-actions,
+    .result-card:focus-within .result-actions {
+      opacity: 1;
+    }
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .action-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      background: rgba(59, 130, 246, 0.08);
+    }
+    .action-btn.active { color: var(--highlight); border-color: var(--highlight); }
+    .action-btn:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+
+    /* ============ [13] MODO GRID ============ */
+    #resultsContainer.grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    #resultsContainer.grid-view .result-card { margin-bottom: 0; }
+
+    /* ============ [15] ESTADO VACÍO MEJORADO ============ */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
       color: var(--text-muted);
     }
-
-    .empty-state icon {
+    .empty-state .empty-icon {
       font-size: 3rem;
       display: block;
       margin-bottom: 12px;
+    }
+    .empty-state h3 { margin-bottom: 8px; color: var(--text-main); }
+    .empty-state p { margin-bottom: 20px; }
+    .empty-suggestions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .empty-suggestions button {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .empty-suggestions button:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    /* ============ [5] BÚSQUEDAS RECIENTES ============ */
+    .recent-searches {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .recent-searches-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .recent-search-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 0.85rem;
+    }
+    .recent-search-item:hover { background: var(--card-bg); }
+    .recent-search-item .remove-recent {
+      opacity: 0;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .recent-search-item:hover .remove-recent { opacity: 1; }
+
+    /* ============ [30] BUSCAR DENTRO DE RESULTADOS ============ */
+    .filter-results-input {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      outline: none;
+      width: 200px;
+    }
+    .filter-results-input:focus { border-color: var(--accent-color); }
+
+    /* ============ [61][62][63] MODALES ============ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px var(--shadow);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal h2 {
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-close {
+      float: right;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover { background: var(--bg-dark); color: var(--text-main); }
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.88rem;
+    }
+    .shortcut-row:last-child { border-bottom: none; }
+    .kbd {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      padding: 2px 8px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: var(--text-main);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .stat-item {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 14px;
+      border-radius: 10px;
+    }
+    .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--accent-color); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+    /* ============ [64] COMPARTIR / QR ============ */
+    .share-qr {
+      text-align: center;
+      padding: 16px;
+      background: var(--bg-dark);
+      border-radius: 10px;
+      margin-top: 12px;
+    }
+    .share-qr img { max-width: 180px; border-radius: 8px; }
+
+    /* ============ [44] HIGH CONTRAST ============ */
+    body.high-contrast {
+      --border-color: #ffffff;
+      --text-muted: #e0e0e0;
+    }
+    body.high-contrast .result-card,
+    body.high-contrast .modal,
+    body.high-contrast header {
+      border-width: 2px;
+    }
+    /* ============ [50] INDICADORES DALTONISMO ============ */
+    body.colorblind .result-type::before { content: '● '; }
+    body.colorblind .badge::before { content: '✓ '; }
+
+    /* ============ [9] OPEN ALL ============ */
+    .open-all-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .open-all-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+
+    /* ============ [48] PAGINACIÓN / LOAD MORE ============ */
+    .load-more-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .load-more-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px 32px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .load-more-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+
+    /* ============ [35][37][38][39] RESULTADOS ESPECIALES ============ */
+    .special-result {
+      border: 2px solid var(--accent-cyan);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), var(--card-bg));
+    }
+    .special-result .result-type { background: rgba(6,182,212,0.3); }
+
+    /* ============ [66] PRINT STYLES ============ */
+    @media print {
+      header, .filter-bar, .result-actions, .header-actions,
+      .voice-btn, .clear-btn, .engine-btn, .suggestions, .skip-link { display: none !important; }
+      body { background: white; color: black; }
+      .result-card { border: 1px solid #ccc; page-break-inside: avoid; }
+      .result-title a { color: #0066cc; }
+    }
+
+    /* ============ [67][68] PWA BANNER ============ */
+    .pwa-banner {
+      background: linear-gradient(90deg, var(--accent-color), var(--accent-cyan));
+      color: white;
+      padding: 10px 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .pwa-banner.show { display: flex; }
+    .pwa-install-btn {
+      background: white;
+      color: var(--accent-color);
+      border: none;
+      padding: 5px 14px;
+      border-radius: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* ============ [8] COPIED TOAST ============ */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--accent-color);
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 40px var(--shadow);
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ============ [43] FOCUS VISIBLE GLOBAL ============ */
+    *:focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    footer a { color: var(--accent-color); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 720px) {
+      header { padding: 12px 14px; gap: 10px; }
+      .brand { font-size: 1.1rem; }
+      .filter-bar { padding: 10px 14px; }
+      main { padding: 16px; }
+      #resultsContainer.grid-view { grid-template-columns: 1fr; }
+      .filter-bar-right { width: 100%; }
+      .filter-results-input { flex: 1; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">
-      ⚡ <span>OSC Engine</span>
+  <!-- [47] SKIP LINK -->
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- [67] PWA BANNER -->
+  <div class="pwa-banner" id="pwaBanner">
+    <span>📲 Instala OSC Engine como app nativa</span>
+    <button class="pwa-install-btn" onclick="installPWA()">Instalar</button>
+    <button class="pwa-install-btn" onclick="dismissPWA()" style="background:rgba(255,255,255,0.2);color:white;">✕</button>
+  </div>
+
+  <header id="header">
+    <!-- [70] EASTER EGG CLICK EN EL LOGO -->
+    <div class="brand" id="brand" role="banner" tabindex="0" aria-label="OSC Engine inicio">
+      <span class="brand-icon" aria-hidden="true">⚡</span>
+      <span>OSC Engine</span>
     </div>
 
-    <div class="search-box-container">
-      <input type="text" id="engineQuery" class="search-box" placeholder="Busca conocimiento libre, recursos o webs sin anuncios..." value="JavaScript">
-      <button class="engine-btn" onclick="executeSearch()">Buscar</button>
+    <div class="search-wrapper">
+      <!-- [21] SELECTOR DE MOTOR -->
+      <select class="engine-selector" id="engineSelector" aria-label="Motor de búsqueda">
+        <option value="osc" selected>⚡ OSC</option>
+        <option value="google">🌐 Google</option>
+        <option value="duckduckgo">🦆 DDG</option>
+        <option value="bing">🔍 Bing</option>
+        <option value="wikipedia">📚 Wiki</option>
+      </select>
+
+      <div class="search-box-container" id="searchBoxContainer">
+        <input
+          type="text"
+          id="engineQuery"
+          class="search-box"
+          placeholder="Busca conocimiento libre, recursos o webs sin anuncios..."
+          value="JavaScript"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Campo de búsqueda"
+          aria-autocomplete="list"
+          aria-controls="suggestions"
+          role="combobox"
+          aria-expanded="false"
+        >
+        <!-- [17] CLEAR -->
+        <button class="clear-btn" id="clearBtn" title="Limpiar (Esc)" aria-label="Limpiar búsqueda">✕</button>
+        <!-- [16] VOICE -->
+        <button class="voice-btn" id="voiceBtn" title="Búsqueda por voz" aria-label="Búsqueda por voz">🎤</button>
+
+        <!-- [4] SUGGESTIONS -->
+        <div class="suggestions" id="suggestions" role="listbox"></div>
+      </div>
+
+      <button class="engine-btn" onclick="executeSearch()" aria-label="Buscar">Buscar</button>
     </div>
 
     <div class="engine-stats">
-      <div class="badge">🛡️ AdBlock Protegido</div>
+      <div class="badge" title="AdBlock activo">🛡️ AdBlock</div>
       <span id="speedCounter">⚡ 0 ms</span>
+    </div>
+
+    <!-- [1] ACCIONES DEL HEADER -->
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="Cambiar tema (Ctrl+D)" aria-label="Cambiar tema">🌙</button>
+      <button class="icon-btn" id="fontDecrease" title="Reducir fuente" aria-label="Reducir fuente">A-</button>
+      <button class="icon-btn" id="fontIncrease" title="Aumentar fuente" aria-label="Aumentar fuente">A+</button>
+      <button class="icon-btn" id="contrastBtn" title="Alto contraste" aria-label="Alto contraste">◐</button>
+      <button class="icon-btn" id="statsBtn" title="Estadísticas (Ctrl+I)" aria-label="Estadísticas">📊</button>
+      <button class="icon-btn" id="helpBtn" title="Ayuda (Ctrl+?)" aria-label="Ayuda">❓</button>
     </div>
   </header>
 
-  <div class="filter-bar">
-    <button class="filter-tag active" onclick="filterResults('all', this)">🌐 Todo</button>
-    <button class="filter-tag" onclick="filterResults('open-source', this)">💻 Open Source</button>
-    <button class="filter-tag" onclick="filterResults('media', this)">🎨 Medios Libres</button>
-    <button class="filter-tag" onclick="filterResults('archive', this)">🏛️ Archivos</button>
-    <button class="filter-tag" onclick="filterResults('wiki', this)">📚 Documentación</button>
+  <!-- [33] FILTROS CON CONTADORES + [12] ORDEN + [30] FILTRO DENTRO -->
+  <div class="filter-bar" role="toolbar" aria-label="Filtros de categoría">
+    <button class="filter-tag active" data-cat="all" onclick="filterResults('all', this)">🌐 Todo <span class="filter-count" data-count="all">0</span></button>
+    <button class="filter-tag" data-cat="open-source" onclick="filterResults('open-source', this)">💻 Open Source <span class="filter-count" data-count="open-source">0</span></button>
+    <button class="filter-tag" data-cat="media" onclick="filterResults('media', this)">🎨 Medios Libres <span class="filter-count" data-count="media">0</span></button>
+    <button class="filter-tag" data-cat="archive" onclick="filterResults('archive', this)">🏛️ Archivos <span class="filter-count" data-count="archive">0</span></button>
+    <button class="filter-tag" data-cat="wiki" onclick="filterResults('wiki', this)">📚 Documentación <span class="filter-count" data-count="wiki">0</span></button>
+    <button class="filter-tag" data-cat="bookmarked" onclick="filterResults('bookmarked', this)">⭐ Guardados <span class="filter-count" data-count="bookmarked">0</span></button>
+
+    <div class="filter-bar-right">
+      <input type="text" class="filter-results-input" id="filterResultsInput" placeholder="🔎 Filtrar resultados..." aria-label="Filtrar dentro de resultados">
+      <select class="sort-select" id="sortSelect" aria-label="Ordenar resultados">
+        <option value="relevance">Relevancia</option>
+        <option value="title-asc">Título A-Z</option>
+        <option value="title-desc">Título Z-A</option>
+        <option value="type">Tipo</option>
+      </select>
+      <button class="open-all-btn" id="viewToggle" title="Cambiar vista (grid/lista)">▦</button>
+      <button class="open-all-btn" id="exportBtn" title="Exportar resultados">⬇️</button>
+    </div>
   </div>
 
-  <main>
-    <div class="results-info" id="resultsCount">Resultados procesados por OSC Engine</div>
-    <div id="resultsContainer"></div>
+  <main id="main-content">
+    <div class="results-info">
+      <span id="resultsCount" aria-live="polite">Resultados procesados por OSC Engine</span>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="open-all-btn" id="openAllBtn" title="Abrir todos los resultados">🔗 Abrir todos</button>
+        <button class="open-all-btn" id="luckyBtn" title="Voy a tener suerte">🎲 Suerte</button>
+      </div>
+    </div>
+    <div id="resultsContainer" role="list" aria-label="Resultados de búsqueda"></div>
+    <div class="load-more-container" id="loadMoreContainer" style="display:none;">
+      <button class="load-more-btn" onclick="loadMore()">Cargar más resultados</button>
+    </div>
   </main>
 
+  <footer>
+    <span>© <span id="year"></span> OSC Engine</span>
+    <span>·</span>
+    <a href="https://github.com/David4524-maker" target="_blank" rel="noopener">GitHub</a>
+    <span>·</span>
+    <span>Hecho con ❤️ y Python</span>
+    <span>·</span>
+    <span id="footerStats"></span>
+  </footer>
+
+  <!-- [61] MODAL ESTADÍSTICAS -->
+  <div class="modal-overlay" id="statsModal" onclick="if(event.target===this) closeModal('statsModal')">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" onclick="closeModal('statsModal')" aria-label="Cerrar">✕</button>
+      <h2>📊 Estadísticas locales</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statSearches">0</div>
+          <div class="stat-label">Búsquedas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statResults">0</div>
+          <div class="stat-label">Resultados vistos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statFaster">0s</div>
+          <div class="stat-label">Tiempo ahorrado</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statAds">0</div>
+          <div class="stat-label">Anuncios bloqueados</div>
+        </div>
+      </div>
+      <p style="margin-top:16px; font-size:0.8rem; color:var(--text-muted); text-align:center;">
+        🔒 Todos los datos se guardan solo en tu navegador
+      </p>
+    </div>
+  </div>
+
+  <!-- [63] MODAL AYUDA -->
+  <div class="modal-overlay" id="helpModal" onclick="if(event.target===this) closeModal('helpModal')">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" onclick="closeModal('helpModal')" aria-label="Cerrar">✕</button>
+      <h2>⌨️ Atajos de teclado</h2>
+      <div class="shortcut-row"><span>Enfocar búsqueda</span><span class="kbd">Ctrl + K</span></div>
+      <div class="shortcut-row"><span>Enfocar búsqueda</span><span class="kbd">/</span></div>
+      <div class="shortcut-row"><span>Limpiar búsqueda</span><span class="kbd">Esc</span></div>
+      <div class="shortcut-row"><span>Cambiar tema</span><span class="kbd">Ctrl + D</span></div>
+      <div class="shortcut-row"><span>Ver estadísticas</span><span class="kbd">Ctrl + I</span></div>
+      <div class="shortcut-row"><span>Abrir ayuda</span><span class="kbd">Ctrl + ?</span></div>
+      <div class="shortcut-row"><span>Navegar resultados</span><span class="kbd">↑ ↓</span></div>
+      <div class="shortcut-row"><span>Ir al resultado</span><span class="kbd">Enter</span></div>
+      <div class="shortcut-row"><span>Guardar resultado</span><span class="kbd">B</span></div>
+      <div class="shortcut-row"><span>Copiar URL</span><span class="kbd">C</span></div>
+      <hr style="border:0;border-top:1px solid var(--border-color);margin:12px 0;">
+      <h2 style="font-size:1rem;">🔍 Operadores</h2>
+      <div class="shortcut-row"><span>Solo Wikipedia</span><span class="kbd">!w python</span></div>
+      <div class="shortcut-row"><span>Solo GitHub</span><span class="kbd">!gh react</span></div>
+      <div class="shortcut-row"><span>Solo Archive.org</span><span class="kbd">!ia libros</span></div>
+      <div class="shortcut-row"><span>Calculadora</span><span class="kbd">2+2*3</span></div>
+      <div class="shortcut-row"><span>Solo tipo wiki</span><span class="kbd">type:wiki</span></div>
+    </div>
+  </div>
+
+  <!-- [64] MODAL COMPARTIR -->
+  <div class="modal-overlay" id="shareModal" onclick="if(event.target===this) closeModal('shareModal')">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" onclick="closeModal('shareModal')" aria-label="Cerrar">✕</button>
+      <h2>🔗 Compartir búsqueda</h2>
+      <div class="modal-field">
+        <input type="text" id="shareUrl" class="filter-results-input" style="width:100%; padding:10px 14px;" readonly>
+      </div>
+      <div class="share-qr">
+        <img id="qrImage" alt="Código QR" src="">
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="engine-btn" style="flex:1;" onclick="copyShareUrl()">📋 Copiar URL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- [8] TOAST -->
+  <div class="toast" id="toast"></div>
+
   <script>
-    /* Motor Central: Core de Indexación y Generación de Resultados Libres */
+    'use strict';
+
+    /* ============================================================
+       [31] BASE DE DATOS EXPANDIDA (INDEX)
+       ============================================================ */
     class OSCEngineCore {
       constructor() {
         this.indexDatabase = [
-          {
-            title: "MDN Web Docs - Aprendizaje de JavaScript",
-            url: "https://developer.mozilla.org",
-            type: "wiki",
-            category: "wiki",
-            snippet: "Documentación libre de derechos mantenida por Mozilla. Recursos y guías completas sobre desarrollo con JavaScript, HTML5 y APIS de la web."
-          },
-          {
-            title: "Wikimedia Commons - Colección de Contenido Abierto",
-            url: "https://commons.wikimedia.org",
-            type: "media",
-            category: "media",
-            snippet: "Repositorio con millones de archivos multimedia (imágenes, sonidos y videos) bajo licencias libres y de dominio público."
-          },
-          {
-            title: "GitHub - Repositorios Abiertos y Proyectos Open Source",
-            url: "https://github.com",
-            type: "open-source",
-            category: "open-source",
-            snippet: "Explora código fuente libre, librerías universales, módulos de programación y proyectos creados por la comunidad internacional."
-          },
-          {
-            title: "Internet Archive - Biblioteca Digital de Dominio Público",
-            url: "https://archive.org",
-            type: "archive",
-            category: "archive",
-            snippet: "Acceso ilimitado a millones de libros, software de preservación histórica, películas antiguas y capturas de la web sin fines de lucro."
-          },
-          {
-            title: "Openverse - Motor de Búsqueda Creative Commons",
-            url: "https://openverse.org",
-            type: "media",
-            category: "media",
-            snippet: "Indexador con más de 600 millones de imágenes y archivos de audio bajo licencias abiertas listos para ser reutilizados gratuitamente."
-          },
-          {
-            title: "Wikipedia en Español - Enciclopedia Libre",
-            url: "https://es.wikipedia.org",
-            type: "wiki",
-            category: "wiki",
-            snippet: "El proyecto enciclopédico de conocimiento libre más extenso de la red, editado y verificado por una comunidad global."
-          }
+          { title: "MDN Web Docs - Aprendizaje de JavaScript", url: "https://developer.mozilla.org", type: "wiki", category: "wiki", snippet: "Documentación libre de derechos mantenida por Mozilla. Recursos y guías completas sobre desarrollo con JavaScript, HTML5 y APIS de la web." },
+          { title: "Wikimedia Commons - Colección de Contenido Abierto", url: "https://commons.wikimedia.org", type: "media", category: "media", snippet: "Repositorio con millones de archivos multimedia (imágenes, sonidos y videos) bajo licencias libres y de dominio público." },
+          { title: "GitHub - Repositorios Abiertos y Proyectos Open Source", url: "https://github.com", type: "open-source", category: "open-source", snippet: "Explora código fuente libre, librerías universales, módulos de programación y proyectos creados por la comunidad internacional." },
+          { title: "Internet Archive - Biblioteca Digital de Dominio Público", url: "https://archive.org", type: "archive", category: "archive", snippet: "Acceso ilimitado a millones de libros, software de preservación histórica, películas antiguas y capturas de la web sin fines de lucro." },
+          { title: "Openverse - Motor de Búsqueda Creative Commons", url: "https://openverse.org", type: "media", category: "media", snippet: "Indexador con más de 600 millones de imágenes y archivos de audio bajo licencias abiertas listos para ser reutilizados gratuitamente." },
+          { title: "Wikipedia en Español - Enciclopedia Libre", url: "https://es.wikipedia.org", type: "wiki", category: "wiki", snippet: "El proyecto enciclopédico de conocimiento libre más extenso de la red, editado y verificado por una comunidad global." },
+          { title: "Python.org - Lenguaje de Programación", url: "https://www.python.org", type: "open-source", category: "open-source", snippet: "Sitio oficial de Python. Documentación, descargas y comunidad del lenguaje de programación más popular del mundo." },
+          { title: "React - Librería JavaScript para Interfaces", url: "https://react.dev", type: "open-source", category: "open-source", snippet: "Librería de código abierto creada por Meta para construir interfaces de usuario interactivas con componentes reutilizables." },
+          { title: "Vue.js - Framework Progresivo", url: "https://vuejs.org", type: "open-source", category: "open-source", snippet: "Framework JavaScript de código abierto, progresivo y accesible, ideal para crear aplicaciones web modernas." },
+          { title: "Project Gutenberg - Libros Libres", url: "https://www.gutenberg.org", type: "archive", category: "archive", snippet: "Más de 70.000 libros electrónicos gratuitos, con licencias abiertas o dominio público, en múltiples formatos." },
+          { title: "Unsplash - Fotos Gratuitas", url: "https://unsplash.com", type: "media", category: "media", snippet: "Millones de fotografías de alta calidad, regaladas por fotógrafos de todo el mundo, sin restricciones de uso." },
+          { title: "FreeCodeCamp - Aprende a Programar", url: "https://www.freecodecamp.org", type: "wiki", category: "wiki", snippet: "Plataforma de aprendizaje interactivo de programación totalmente gratuita y sin fines de lucro." },
+          { title: "Linux Kernel - Código Fuente", url: "https://www.kernel.org", type: "open-source", category: "open-source", snippet: "El corazón de Linux, mantenido por Linus Torvalds y miles de colaboradores bajo licencia GPL." },
+          { title: "OpenStreetMap - Mapas Libres", url: "https://www.openstreetmap.org", type: "media", category: "media", snippet: "El mapa editable del mundo, construido por voluntarios y de uso totalmente libre." },
+          { title: "Standard Ebooks - Clásicos Editados", url: "https://standardebooks.org", type: "archive", category: "archive", snippet: "Libros de dominio público editados con altos estándares tipográficos y de accesibilidad." }
         ];
+        this.cache = new Map(); // [52] cache
       }
 
+      // [34] fuzzy matching + [35] operadores + [36] bangs + [37] calculadora
       search(query, categoryFilter = 'all') {
         const startTime = performance.now();
-        const cleanQuery = query.toLowerCase().trim();
+        let cleanQuery = (query || '').toLowerCase().trim();
 
-        let filtered = this.indexDatabase.filter(item => {
-          const matchQuery = item.title.toLowerCase().includes(cleanQuery) || 
-                             item.snippet.toLowerCase().includes(cleanQuery) ||
-                             cleanQuery === '';
-          const matchCategory = categoryFilter === 'all' || item.category === categoryFilter;
-          return matchQuery && matchCategory;
-        });
+        // [37] CALCULADORA
+        const calcResult = this.tryCalculator(cleanQuery);
+        if (calcResult) {
+          const time = Math.round((performance.now() - startTime) * 100) / 100;
+          return { results: [calcResult], time, total: 1, special: true };
+        }
 
-        // Si la búsqueda no coincide con la base simulada, generar enlaces de exploración directa en tiempo real
+        // [35] Operadores
+        let typeFilter = null;
+        const typeMatch = cleanQuery.match(/type:(\w+)/);
+        if (typeMatch) {
+          typeFilter = typeMatch[1];
+          cleanQuery = cleanQuery.replace(/type:\w+/g, '').trim();
+        }
+
+        // [36] BANGS
+        const bangs = {
+          '!w': { site: 'es.wikipedia.org', label: 'Wikipedia' },
+          '!gh': { site: 'github.com', label: 'GitHub' },
+          '!ia': { site: 'archive.org', label: 'Internet Archive' },
+          '!g': { site: 'google.com', label: 'Google' },
+          '!ddg': { site: 'duckduckgo.com', label: 'DuckDuckGo' }
+        };
+        for (const [bang, info] of Object.entries(bangs)) {
+          if (cleanQuery.startsWith(bang + ' ')) {
+            cleanQuery = cleanQuery.slice(bang.length).trim();
+            const url = `https://${info.site}/search?q=${encodeURIComponent(cleanQuery)}`;
+            const time = Math.round((performance.now() - startTime) * 100) / 100;
+            return {
+              results: [{
+                title: `${info.label}: ${cleanQuery}`,
+                url,
+                type: 'wiki',
+                category: 'wiki',
+                snippet: `Búsqueda directa en ${info.label} para "${cleanQuery}".`
+              }],
+              time, total: 1
+            };
+          }
+        }
+
+        // [52] CACHE
+        const cacheKey = `${cleanQuery}|${categoryFilter}|${typeFilter}`;
+        if (this.cache.has(cacheKey)) {
+          const cached = this.cache.get(cacheKey);
+          return { ...cached, time: 0.01 };
+        }
+
+        // [34] Búsqueda fuzzy
+        const results = this.indexDatabase
+          .map(item => ({
+            item,
+            score: this.fuzzyScore(cleanQuery, item)
+          }))
+          .filter(r => r.score > 0 || cleanQuery === '')
+          .filter(({ item }) => {
+            const matchCat = categoryFilter === 'all' || item.category === categoryFilter;
+            const matchType = !typeFilter || item.type === typeFilter;
+            return matchCat && matchType;
+          })
+          .sort((a, b) => b.score - a.score)
+          .map(({ item }) => item);
+
+        let filtered = results;
+
+        // Si no hay coincidencias, generar enlaces externos
         if (filtered.length === 0 && cleanQuery !== '') {
           filtered = [
             {
               title: `Wikipedia: ${query}`,
               url: `https://es.wikipedia.org/wiki/${encodeURIComponent(query)}`,
-              type: "wiki",
-              category: "wiki",
-              snippet: `Resultados enciclopédicos libres y verificados sobre "${query}" en el repositorio abierto de Wikipedia.`
+              type: "wiki", category: "wiki",
+              snippet: `Resultados enciclopédicos libres y verificados sobre "${query}".`
             },
             {
               title: `Wikimedia Commons: Recursos sobre "${query}"`,
               url: `https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(query)}`,
-              type: "media",
-              category: "media",
+              type: "media", category: "media",
               snippet: `Archivos multimedia, diagramas e imágenes de uso libre relacionados con "${query}".`
             },
             {
               title: `Openverse: Licencias Abiertas de "${query}"`,
               url: `https://openverse.org/search/?q=${encodeURIComponent(query)}`,
-              type: "media",
-              category: "media",
+              type: "media", category: "media",
               snippet: `Búsqueda de elementos bajo Creative Commons para "${query}".`
             },
             {
               title: `Internet Archive: Registros de "${query}"`,
               url: `https://archive.org/details/texts?query=${encodeURIComponent(query)}`,
-              type: "archive",
-              category: "archive",
+              type: "archive", category: "archive",
               snippet: `Textos históricos, software y documentos preservados en el dominio público.`
             }
           ];
@@ -367,74 +1220,972 @@
 
         const endTime = performance.now();
         const executionTime = Math.round((endTime - startTime) * 100) / 100;
+        const result = { results: filtered, time: executionTime, total: filtered.length };
 
-        return {
-          results: filtered,
-          time: executionTime,
-          total: filtered.length
-        };
+        this.cache.set(cacheKey, result);
+        return result;
+      }
+
+      // [34] Fuzzy score
+      fuzzyScore(query, item) {
+        if (!query) return 1;
+        const text = (item.title + ' ' + item.snippet).toLowerCase();
+        // coincidencia exacta
+        if (text.includes(query)) return 10 + (item.title.toLowerCase().includes(query) ? 5 : 0);
+        // token match
+        const tokens = query.split(/\s+/).filter(t => t.length > 1);
+        if (tokens.length === 0) return 0;
+        let score = 0;
+        for (const token of tokens) {
+          if (text.includes(token)) score += 3;
+          else if (this.levenshtein(token, text) < 3) score += 1;
+        }
+        return score;
+      }
+
+      // [34] Levenshtein para typos
+      levenshtein(a, b) {
+        if (a.length > 20) return 99;
+        const words = b.split(/\s+/).slice(0, 40);
+        let min = 99;
+        for (const w of words) {
+          min = Math.min(min, this._lev(a, w.slice(0, 20)));
+        }
+        return min;
+      }
+      _lev(a, b) {
+        const m = a.length, n = b.length;
+        const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+        for (let j = 0; j <= n; j++) dp[0][j] = j;
+        for (let i = 1; i <= m; i++) {
+          for (let j = 1; j <= n; j++) {
+            dp[i][j] = Math.min(
+              dp[i-1][j] + 1,
+              dp[i][j-1] + 1,
+              dp[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
+            );
+          }
+        }
+        return dp[m][n];
+      }
+
+      // [37] Calculadora
+      tryCalculator(q) {
+        if (!/^[\d\s+\-*/().,%^]+$/.test(q)) return null;
+        if (!/[\d]/.test(q)) return null;
+        if (!/[+\-*/^%]/.test(q)) return null;
+        try {
+          const expr = q.replace(/\^/g, '**').replace(/,/g, '');
+          // eslint-disable-next-line no-new-func
+          const val = Function('"use strict"; return (' + expr + ')')();
+          if (typeof val !== 'number' || !isFinite(val)) return null;
+          return {
+            title: `${q} = ${val}`,
+            url: `https://www.google.com/search?q=${encodeURIComponent(q)}`,
+            type: 'calc',
+            category: 'calc',
+            snippet: `Resultado calculado: ${val}. Clic para verificar en Google.`
+          };
+        } catch { return null; }
       }
     }
 
+    /* ============================================================
+       ESTADO GLOBAL
+       ============================================================ */
     const engineCore = new OSCEngineCore();
     let currentCategory = 'all';
+    let allResults = [];
+    let displayedResults = [];
+    let currentPage = 0;
+    const PAGE_SIZE = 10;
+    let focusedIndex = -1;
+    const STORAGE = {
+      theme: 'osc_theme',
+      font: 'osc_font',
+      recent: 'osc_recent',
+      bookmarks: 'osc_bookmarks',
+      stats: 'osc_stats',
+      contrast: 'osc_contrast',
+      colorblind: 'osc_colorblind',
+      view: 'osc_view'
+    };
 
-    function executeSearch() {
-      const query = document.getElementById('engineQuery').value;
-      const searchData = engineCore.search(query, currentCategory);
-      
-      document.getElementById('speedCounter').textContent = `⚡ ${searchData.time} ms`;
-      document.getElementById('resultsCount').textContent = `Se encontraron ${searchData.total} resultados libres para "${query || 'Todo'}"`;
-
-      renderResults(searchData.results);
+    /* ============================================================
+       [2][41][42][43] UTILIDADES
+       ============================================================ */
+    function $(sel, ctx = document) { return ctx.querySelector(sel); }
+    function $$(sel, ctx = document) { return Array.from(ctx.querySelectorAll(sel)); }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    }
+    function debounce(fn, ms) {
+      let timer;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), ms);
+      };
     }
 
-    function renderResults(results) {
-      const container = document.getElementById('resultsContainer');
-      container.innerHTML = '';
+    /* ============================================================
+       [1] TEMA CLARO/OSCURO
+       ============================================================ */
+    function initTheme() {
+      const saved = localStorage.getItem(STORAGE.theme) || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(STORAGE.theme, next);
+      updateThemeIcon(next);
+      showToast(next === 'dark' ? '🌙 Tema oscuro' : '☀️ Tema claro');
+    }
+    function updateThemeIcon(theme) {
+      const btn = $('#themeBtn');
+      if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
 
-      if (results.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <span style="font-size: 2.5rem; display:block; margin-bottom:10px;">🔍</span>
-            <h3>No se encontraron resultados sin anuncios.</h3>
-            <p>Intenta ajustar el término de búsqueda o selecciona la categoría "🌐 Todo".</p>
-          </div>
-        `;
-        return;
+    /* ============================================================
+       [45] AJUSTE DE TAMAÑO DE FUENTE
+       ============================================================ */
+    let currentFont = parseInt(localStorage.getItem(STORAGE.font)) || 16;
+    function applyFont() {
+      document.documentElement.style.setProperty('--base-font', currentFont + 'px');
+      localStorage.setItem(STORAGE.font, currentFont);
+    }
+    function changeFont(delta) {
+      currentFont = Math.max(12, Math.min(24, currentFont + delta));
+      applyFont();
+    }
+
+    /* ============================================================
+       [44][50] ACCESIBILIDAD
+       ============================================================ */
+    function toggleContrast() {
+      document.body.classList.toggle('high-contrast');
+      localStorage.setItem(STORAGE.contrast, document.body.classList.contains('high-contrast') ? '1' : '0');
+      showToast('◐ Alto contraste ' + (document.body.classList.contains('high-contrast') ? 'ON' : 'OFF'));
+    }
+    function initContrast() {
+      if (localStorage.getItem(STORAGE.contrast) === '1') document.body.classList.add('high-contrast');
+      if (localStorage.getItem(STORAGE.colorblind) === '1') document.body.classList.add('colorblind');
+    }
+
+    /* ============================================================
+       [3][5] HISTORIAL DE BÚSQUEDAS
+       ============================================================ */
+    function getRecent() {
+      try { return JSON.parse(localStorage.getItem(STORAGE.recent) || '[]'); }
+      catch { return []; }
+    }
+    function saveRecent(q) {
+      if (!q || !q.trim()) return;
+      let list = getRecent().filter(x => x !== q);
+      list.unshift(q);
+      list = list.slice(0, 10);
+      localStorage.setItem(STORAGE.recent, JSON.stringify(list));
+    }
+    function removeRecent(q) {
+      let list = getRecent().filter(x => x !== q);
+      localStorage.setItem(STORAGE.recent, JSON.stringify(list));
+      renderEmptyStateIfNeeded();
+    }
+
+    /* ============================================================
+       [27] BOOKMARKS
+       ============================================================ */
+    function getBookmarks() {
+      try { return JSON.parse(localStorage.getItem(STORAGE.bookmarks) || '[]'); }
+      catch { return []; }
+    }
+    function isBookmarked(url) {
+      return getBookmarks().some(b => b.url === url);
+    }
+    function toggleBookmark(item) {
+      let list = getBookmarks();
+      if (isBookmarked(item.url)) {
+        list = list.filter(b => b.url !== item.url);
+        showToast('⭐ Eliminado de guardados');
+      } else {
+        list.push(item);
+        showToast('⭐ Guardado');
       }
-
-      results.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'result-card';
-        card.innerHTML = `
-          <div class="result-header">
-            <span class="result-type">${item.type}</span>
-            <span class="result-url">${item.url}</span>
-          </div>
-          <div class="result-title">
-            <a href="${item.url}" target="_blank" rel="noopener">${item.title}</a>
-          </div>
-          <div class="result-snippet">${item.snippet}</div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function filterResults(category, element) {
-      document.querySelectorAll('.filter-tag').forEach(tag => tag.classList.remove('active'));
-      element.classList.add('active');
-      currentCategory = category;
+      localStorage.setItem(STORAGE.bookmarks, JSON.stringify(list));
+      updateFilterCounts();
       executeSearch();
     }
 
-    // Listener para buscar al presionar la tecla Enter
-    document.getElementById('engineQuery').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') executeSearch();
-    });
+    /* ============================================================
+       [61] ESTADÍSTICAS
+       ============================================================ */
+    function getStats() {
+      try { return JSON.parse(localStorage.getItem(STORAGE.stats) || '{"searches":0,"results":0,"ads":0}'); }
+      catch { return { searches: 0, results: 0, ads: 0 }; }
+    }
+    function updateStats(updater) {
+      const s = getStats();
+      updater(s);
+      localStorage.setItem(STORAGE.stats, JSON.stringify(s));
+    }
+    function renderStats() {
+      const s = getStats();
+      $('#statSearches').textContent = s.searches;
+      $('#statResults').textContent = s.results;
+      $('#statAds').textContent = s.ads;
+      const seconds = Math.round(s.searches * 15);
+      const timeStr = seconds > 60 ? Math.round(seconds/60) + 'm' : seconds + 's';
+      $('#statFaster').textContent = timeStr;
+      $('#footerStats').textContent = `${s.searches} búsquedas · ${s.ads} ads bloqueados`;
+    }
 
-    // Ejecutar búsqueda inicial al cargar el motor
-    executeSearch();
+    /* ============================================================
+       [8] TOAST
+       ============================================================ */
+    let toastTimer;
+    function showToast(msg, ms = 2000) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+    }
+
+    /* ============================================================
+       [6] HIGHLIGHT EN RESULTADOS
+       ============================================================ */
+    function highlight(text, query) {
+      const safe = escapeHtml(text);
+      if (!query || !query.trim()) return safe;
+      const tokens = query.trim().split(/\s+/).filter(t => t.length > 1);
+      if (tokens.length === 0) return safe;
+      const pattern = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      try {
+        return safe.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>');
+      } catch { return safe; }
+    }
+
+    /* ============================================================
+       EJECUTAR BÚSQUEDA
+       ============================================================ */
+    function executeSearch(keepPage = false) {
+      const query = $('#engineQuery').value;
+      const engine = $('#engineSelector').value;
+
+      // [22] Si es URL directa → abrir
+      if (isDirectUrl(query) && engine === 'osc') {
+        window.open(query, '_blank', 'noopener');
+        showToast('🚀 Abriendo URL...');
+        return;
+      }
+
+      // Si el motor NO es OSC, delegar
+      if (engine !== 'osc') {
+        const url = buildEngineUrl(engine, query);
+        window.open(url, '_blank', 'noopener');
+        showToast(`🔎 Buscando en ${engine}...`);
+        saveRecent(query);
+        updateStats(s => s.searches++);
+        return;
+      }
+
+      // [10] skeleton loading
+      showSkeleton();
+
+      const searchData = engineCore.search(query, currentCategory);
+
+      // Delay mínimo para UX
+      setTimeout(() => {
+        allResults = searchData.results;
+        if (!keepPage) currentPage = 0;
+
+        $('#speedCounter').textContent = `⚡ ${searchData.time} ms`;
+        $('#resultsCount').innerHTML = `Se encontraron <strong>${searchData.total}</strong> resultados libres para "<strong>${escapeHtml(query || 'Todo')}</strong>"`;
+
+        if (query && query.trim()) saveRecent(query);
+
+        updateFilterCounts();
+        updateStats(s => {
+          s.searches++;
+          s.results += searchData.total;
+          s.ads += Math.floor(Math.random() * 3) + 1; // simulado
+        });
+        renderStats();
+
+        applySortAndFilter();
+        if (!keepPage) scrollToResults();
+      }, 150);
+    }
+
+    function isDirectUrl(q) {
+      return /^https?:\/\/\S+$/i.test(q) ||
+             /^[\w\-]+\.[a-z]{2,}(\/\S*)?$/i.test(q);
+    }
+
+    function buildEngineUrl(engine, q) {
+      const enc = encodeURIComponent(q);
+      const map = {
+        google: `https://www.google.com/search?q=${enc}`,
+        duckduckgo: `https://duckduckgo.com/html/?q=${enc}`,
+        bing: `https://www.bing.com/search?q=${enc}`,
+        wikipedia: `https://es.wikipedia.org/w/index.php?search=${enc}`
+      };
+      return map[engine] || map.google;
+    }
+
+    /* ============================================================
+       [10] SKELETON
+       ============================================================ */
+    function showSkeleton() {
+      const c = $('#resultsContainer');
+      c.classList.remove('grid-view');
+      c.innerHTML = Array(4).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+      `).join('');
+    }
+
+    /* ============================================================
+       [11] SCROLL
+       ============================================================ */
+    function scrollToResults() {
+      const c = $('#resultsContainer');
+      if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ============================================================
+       [12] SORT + [30] FILTRO + [48] PAGINACIÓN
+       ============================================================ */
+    function applySortAndFilter() {
+      let results = [...allResults];
+
+      // [30] Filtro dentro de resultados
+      const localFilter = ($('#filterResultsInput')?.value || '').toLowerCase().trim();
+      if (localFilter) {
+        results = results.filter(r =>
+          r.title.toLowerCase().includes(localFilter) ||
+          r.snippet.toLowerCase().includes(localFilter)
+        );
+      }
+
+      // [12] Sort
+      const sort = $('#sortSelect')?.value || 'relevance';
+      if (sort === 'title-asc') results.sort((a, b) => a.title.localeCompare(b.title));
+      else if (sort === 'title-desc') results.sort((a, b) => b.title.localeCompare(a.title));
+      else if (sort === 'type') results.sort((a, b) => a.type.localeCompare(b.type));
+
+      // [48] Paginación
+      const totalPages = Math.ceil(results.length / PAGE_SIZE);
+      const slice = results.slice(0, (currentPage + 1) * PAGE_SIZE);
+      displayedResults = slice;
+
+      renderResults(slice);
+
+      // Load more
+      const lmc = $('#loadMoreContainer');
+      if (totalPages > currentPage + 1) lmc.style.display = 'block';
+      else lmc.style.display = 'none';
+    }
+
+    function loadMore() {
+      currentPage++;
+      applySortAndFilter();
+    }
+
+    /* ============================================================
+       RENDER RESULTADOS
+       ============================================================ */
+    function renderResults(results) {
+      const container = $('#resultsContainer');
+      container.innerHTML = '';
+      const query = $('#engineQuery').value;
+      const isGrid = container.classList.contains('grid-view');
+
+      if (results.length === 0) {
+        renderEmptyStateIfNeeded();
+        return;
+      }
+
+      // [57] DocumentFragment
+      const frag = document.createDocumentFragment();
+
+      results.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.setAttribute('role', 'listitem');
+        card.setAttribute('tabindex', '0');
+        card.dataset.index = idx;
+        if (item.type === 'calc') card.classList.add('special-result');
+        if (isBookmarked(item.url)) card.classList.add('bookmarked');
+
+        let hostname = '';
+        try { hostname = new URL(item.url).hostname; } catch {}
+
+        const favicon = hostname
+          ? `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
+          : '';
+
+        const readMin = Math.max(1, Math.round((item.snippet.length + item.title.length) / 200));
+
+        card.innerHTML = `
+          <div class="result-header">
+            <span class="result-type">${escapeHtml(item.type)}</span>
+            ${favicon ? `<img class="result-favicon" src="${favicon}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <span class="result-url" title="${escapeHtml(item.url)}">${escapeHtml(item.url)}</span>
+            <span class="read-time">${readMin} min</span>
+          </div>
+          <div class="result-title">
+            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${highlight(item.title, query)}</a>
+          </div>
+          <div class="result-snippet">${highlight(item.snippet, query)}</div>
+          <div class="result-actions">
+            <button class="action-btn" data-action="copy" title="Copiar URL">📋 Copiar</button>
+            <button class="action-btn ${isBookmarked(item.url) ? 'active' : ''}" data-action="bookmark" title="Guardar">
+              ${isBookmarked(item.url) ? '⭐ Guardado' : '☆ Guardar'}
+            </button>
+            <button class="action-btn" data-action="share" title="Compartir">🔗 Compartir</button>
+            <button class="action-btn" data-action="open" title="Abrir en nueva pestaña">↗️ Abrir</button>
+          </div>
+        `;
+
+        // Delegación de acciones
+        card.querySelectorAll('.action-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = btn.dataset.action;
+            if (action === 'copy') copyToClipboard(item.url);
+            else if (action === 'bookmark') toggleBookmark(item);
+            else if (action === 'share') openShareModal(item.url);
+            else if (action === 'open') window.open(item.url, '_blank', 'noopener');
+          });
+        });
+
+        // [42] Keyboard nav
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            window.open(item.url, '_blank', 'noopener');
+          } else if (e.key === 'b') {
+            e.preventDefault();
+            toggleBookmark(item);
+          } else if (e.key === 'c') {
+            e.preventDefault();
+            copyToClipboard(item.url);
+          }
+        });
+
+        frag.appendChild(card);
+      });
+
+      container.appendChild(frag);
+    }
+
+    /* ============================================================
+       [15] EMPTY STATE + [5] RECIENTES
+       ============================================================ */
+    function renderEmptyStateIfNeeded() {
+      const container = $('#resultsContainer');
+      container.classList.remove('grid-view');
+      const recent = getRecent();
+
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">🔍</span>
+          <h3>No se encontraron resultados sin anuncios.</h3>
+          <p>Intenta ajustar el término de búsqueda o selecciona otra categoría.</p>
+          <div class="empty-suggestions">
+            <button data-suggest="JavaScript">JavaScript</button>
+            <button data-suggest="Python">Python</button>
+            <button data-suggest="React">React</button>
+            <button data-suggest="Linux">Linux</button>
+            <button data-suggest="Wikipedia">Wikipedia</button>
+          </div>
+          ${recent.length > 0 ? `
+            <div class="recent-searches">
+              <div class="recent-searches-title">🕐 Búsquedas recientes</div>
+              ${recent.map(r => `
+                <div class="recent-search-item">
+                  <span data-recent="${escapeHtml(r)}">${escapeHtml(r)}</span>
+                  <button class="remove-recent" data-remove="${escapeHtml(r)}" aria-label="Eliminar">✕</button>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      container.querySelectorAll('[data-suggest]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          $('#engineQuery').value = btn.dataset.suggest;
+          executeSearch();
+        });
+      });
+      container.querySelectorAll('[data-recent]').forEach(el => {
+        el.addEventListener('click', () => {
+          $('#engineQuery').value = el.dataset.recent;
+          executeSearch();
+        });
+      });
+      container.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeRecent(btn.dataset.remove);
+        });
+      });
+    }
+
+    /* ============================================================
+       [33] CONTADORES EN FILTROS
+       ============================================================ */
+    function updateFilterCounts() {
+      const counts = { all: allResults.length };
+      ['open-source', 'media', 'archive', 'wiki'].forEach(c => {
+        counts[c] = allResults.filter(r => r.category === c).length;
+      });
+      counts['bookmarked'] = getBookmarks().length;
+
+      document.querySelectorAll('.filter-count').forEach(el => {
+        const c = el.dataset.count;
+        el.textContent = counts[c] ?? 0;
+      });
+    }
+
+    /* ============================================================
+       FILTRAR POR CATEGORÍA
+       ============================================================ */
+    function filterResults(category, element) {
+      document.querySelectorAll('.filter-tag').forEach(tag => tag.classList.remove('active'));
+      if (element) element.classList.add('active');
+      currentCategory = category;
+      currentPage = 0;
+
+      if (category === 'bookmarked') {
+        const bm = getBookmarks();
+        allResults = bm;
+        $('#resultsCount').innerHTML = `<strong>${bm.length}</strong> webs guardadas`;
+        applySortAndFilter();
+      } else {
+        executeSearch();
+      }
+    }
+
+    /* ============================================================
+       [4] SUGGESTIONS AUTOCOMPLETE
+       ============================================================ */
+    const showSuggestions = debounce(function() {
+      const input = $('#engineQuery');
+      const q = input.value.trim().toLowerCase();
+      const box = $('#suggestions');
+      const container = $('#searchBoxContainer');
+
+      if (!q) {
+        box.classList.remove('show');
+        container.setAttribute('aria-expanded', 'false');
+        return;
+      }
+
+      const matches = engineCore.indexDatabase
+        .filter(item => item.title.toLowerCase().includes(q))
+        .slice(0, 5);
+
+      const recent = getRecent().filter(r => r.toLowerCase().includes(q)).slice(0, 3);
+
+      if (matches.length === 0 && recent.length === 0) {
+        box.classList.remove('show');
+        container.setAttribute('aria-expanded', 'false');
+        return;
+      }
+
+      box.innerHTML = '';
+
+      if (recent.length > 0) {
+        const lbl = document.createElement('div');
+        lbl.className = 'suggestion-section-label';
+        lbl.textContent = '🕐 Recientes';
+        box.appendChild(lbl);
+        recent.forEach(r => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.setAttribute('role', 'option');
+          div.innerHTML = `<span class="suggestion-icon">🕐</span><span>${highlight(r, q)}</span>`;
+          div.addEventListener('click', () => {
+            input.value = r;
+            box.classList.remove('show');
+            executeSearch();
+          });
+          box.appendChild(div);
+        });
+      }
+
+      if (matches.length > 0) {
+        const lbl = document.createElement('div');
+        lbl.className = 'suggestion-section-label';
+        lbl.textContent = '🔍 Sugerencias';
+        box.appendChild(lbl);
+        matches.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.setAttribute('role', 'option');
+          div.innerHTML = `<span class="suggestion-icon">🔗</span><span>${highlight(item.title, q)}</span>`;
+          div.addEventListener('click', () => {
+            input.value = item.title;
+            box.classList.remove('show');
+            executeSearch();
+          });
+          box.appendChild(div);
+        });
+      }
+
+      box.classList.add('show');
+      container.setAttribute('aria-expanded', 'true');
+    }, 150);
+
+    /* ============================================================
+       [16] BÚSQUEDA POR VOZ
+       ============================================================ */
+    function initVoice() {
+      const btn = $('#voiceBtn');
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        btn.style.display = 'none';
+        return;
+      }
+      const recognition = new SR();
+      recognition.lang = 'es-ES';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      let listening = false;
+      btn.addEventListener('click', () => {
+        if (listening) {
+          recognition.stop();
+          return;
+        }
+        try { recognition.start(); } catch {}
+      });
+      recognition.onstart = () => {
+        listening = true;
+        btn.classList.add('listening');
+        showToast('🎤 Escuchando...');
+      };
+      recognition.onend = () => {
+        listening = false;
+        btn.classList.remove('listening');
+      };
+      recognition.onerror = (e) => {
+        listening = false;
+        btn.classList.remove('listening');
+        showToast('❌ Error de voz: ' + e.error);
+      };
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        $('#engineQuery').value = transcript;
+        executeSearch();
+      };
+    }
+
+    /* ============================================================
+       [7] COPIAR AL PORTAPAPELES
+       ============================================================ */
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('📋 Copiado al portapapeles');
+      } catch {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('📋 Copiado'); }
+        catch { showToast('❌ Error al copiar'); }
+        document.body.removeChild(ta);
+      }
+    }
+
+    /* ============================================================
+       [9] ABRIR TODOS
+       ============================================================ */
+    function openAll() {
+      if (displayedResults.length === 0) { showToast('⚠️ No hay resultados'); return; }
+      if (displayedResults.length > 8 && !confirm(`¿Abrir ${displayedResults.length} pestañas?`)) return;
+      displayedResults.forEach(r => window.open(r.url, '_blank', 'noopener'));
+      showToast(`🚀 Abriendo ${displayedResults.length} pestañas`);
+    }
+
+    /* ============================================================
+       [40] ME SIENTO CON SUERTE
+       ============================================================ */
+    function feelingLucky() {
+      if (allResults.length === 0) { showToast('⚠️ Sin resultados'); return; }
+      const random = allResults[Math.floor(Math.random() * allResults.length)];
+      showToast('🎲 ¡Suerte!');
+      setTimeout(() => window.open(random.url, '_blank', 'noopener'), 300);
+    }
+
+    /* ============================================================
+       [24][25][26] EXPORTAR
+       ============================================================ */
+    function exportResults() {
+      const choice = prompt(
+        '📥 Exportar como:\n1. JSON\n2. CSV\n3. Markdown\n\nEscribe el número:',
+        '1'
+      );
+      if (!choice) return;
+
+      const query = $('#engineQuery').value || 'busqueda';
+      const filename = `osc-${query.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+
+      let content, mime, ext;
+
+      if (choice === '1') {
+        content = JSON.stringify({ query, date: new Date().toISOString(), results: displayedResults }, null, 2);
+        mime = 'application/json'; ext = 'json';
+      } else if (choice === '2') {
+        const esc = s => `"${String(s).replace(/"/g, '""')}"`;
+        const rows = [['title', 'url', 'type', 'category', 'snippet'].map(esc).join(',')];
+        displayedResults.forEach(r => rows.push([r.title, r.url, r.type, r.category, r.snippet].map(esc).join(',')));
+        content = rows.join('\n');
+        mime = 'text/csv'; ext = 'csv';
+      } else if (choice === '3') {
+        content = `# OSC Engine — Resultados para "${query}"\n\n`;
+        displayedResults.forEach((r, i) => {
+          content += `## ${i + 1}. [${r.title}](${r.url})\n\n`;
+          content += `**Tipo:** ${r.type}  \n**URL:** ${r.url}\n\n> ${r.snippet}\n\n---\n\n`;
+        });
+        mime = 'text/markdown'; ext = 'md';
+      } else return;
+
+      const blob = new Blob([content], { type: mime });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${filename}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast(`📥 Exportado como ${ext.toUpperCase()}`);
+    }
+
+    /* ============================================================
+       [64] COMPARTIR
+       ============================================================ */
+    function openShareModal(url) {
+      const shareUrl = url || window.location.href;
+      $('#shareUrl').value = shareUrl;
+      // QR vía API pública
+      $('#qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(shareUrl)}`;
+      openModal('shareModal');
+    }
+    function copyShareUrl() {
+      copyToClipboard($('#shareUrl').value);
+    }
+
+    /* ============================================================
+       MODALES
+       ============================================================ */
+    function openModal(id) {
+      $('#' + id).classList.add('show');
+    }
+    function closeModal(id) {
+      $('#' + id).classList.remove('show');
+    }
+
+    /* ============================================================
+       [67][68] PWA
+       ============================================================ */
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (localStorage.getItem('osc_pwa_dismissed') !== '1') {
+        $('#pwaBanner').classList.add('show');
+      }
+    });
+    function installPWA() {
+      if (!deferredPrompt) { showToast('ℹ️ No disponible'); return; }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        $('#pwaBanner').classList.remove('show');
+      });
+    }
+    function dismissPWA() {
+      $('#pwaBanner').classList.remove('show');
+      localStorage.setItem('osc_pwa_dismissed', '1');
+    }
+
+    /* ============================================================
+       [70] EASTER EGG
+       ============================================================ */
+    function initEasterEgg() {
+      const brand = $('#brand');
+      let buffer = '';
+      brand.addEventListener('click', () => brand.classList.add('easter-egg'));
+      brand.addEventListener('animationend', () => brand.classList.remove('easter-egg'));
+      document.addEventListener('keydown', (e) => {
+        if (e.target.matches('input, textarea')) return;
+        buffer = (buffer + e.key.toLowerCase()).slice(-3);
+        if (buffer === 'osc') {
+          brand.classList.add('easter-egg');
+          showToast('⚡ ¡OSC Engine al poder!');
+        }
+      });
+    }
+
+    /* ============================================================
+       [2] ATAJOS DE TECLADO GLOBALES
+       ============================================================ */
+    function initKeyboard() {
+      document.addEventListener('keydown', (e) => {
+        const inInput = e.target.matches('input, textarea, select');
+
+        // Ctrl+K / Cmd+K → focus búsqueda
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          $('#engineQuery').focus();
+          $('#engineQuery').select();
+          return;
+        }
+        // / → focus (solo si no está en input)
+        if (!inInput && e.key === '/') {
+          e.preventDefault();
+          $('#engineQuery').focus();
+          return;
+        }
+        // Esc → limpiar / cerrar
+        if (e.key === 'Escape') {
+          if (document.querySelector('.modal-overlay.show')) {
+            document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+          } else {
+            $('#engineQuery').value = '';
+            $('#engineQuery').dispatchEvent(new Event('input'));
+            $('#suggestions').classList.remove('show');
+          }
+          return;
+        }
+        // Ctrl+D → theme
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+          e.preventDefault();
+          toggleTheme();
+          return;
+        }
+        // Ctrl+I → stats
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i') {
+          e.preventDefault();
+          renderStats();
+          openModal('statsModal');
+          return;
+        }
+        // Ctrl+? → help
+        if ((e.ctrlKey || e.metaKey) && (e.key === '?' || (e.shiftKey && e.key === '/'))) {
+          e.preventDefault();
+          openModal('helpModal');
+          return;
+        }
+        // ↑ ↓ → navegar resultados
+        if (!inInput && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+          e.preventDefault();
+          const cards = $$('.result-card');
+          if (cards.length === 0) return;
+          focusedIndex = Math.max(0, Math.min(cards.length - 1, focusedIndex + (e.key === 'ArrowDown' ? 1 : -1)));
+          cards.forEach((c, i) => c.classList.toggle('focused', i === focusedIndex));
+          cards[focusedIndex].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      });
+    }
+
+    /* ============================================================
+       [20] HEADER STICKY SHADOW
+       ============================================================ */
+    window.addEventListener('scroll', () => {
+      const h = $('#header');
+      if (window.scrollY > 10) h.classList.add('scrolled');
+      else h.classList.remove('scrolled');
+    }, { passive: true });
+
+    /* ============================================================
+       [22] DETECCIÓN URL DIRECTA EN INPUT
+       ============================================================ */
+    function initUrlDetection() {
+      const input = $('#engineQuery');
+      const container = $('#searchBoxContainer');
+      input.addEventListener('input', () => {
+        container.classList.toggle('has-value', input.value.length > 0);
+        showSuggestions();
+      });
+    }
+
+    /* ============================================================
+       INICIALIZACIÓN
+       ============================================================ */
+    function init() {
+      initTheme();
+      applyFont();
+      initContrast();
+      initVoice();
+      initKeyboard();
+      initEasterEgg();
+      initUrlDetection();
+      renderStats();
+
+      $('#year').textContent = new Date().getFullYear();
+
+      // Listeners
+      $('#engineQuery').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $('#suggestions').classList.remove('show');
+          executeSearch();
+        }
+      });
+
+      $('#themeBtn').addEventListener('click', toggleTheme);
+      $('#fontDecrease').addEventListener('click', () => changeFont(-1));
+      $('#fontIncrease').addEventListener('click', () => changeFont(1));
+      $('#contrastBtn').addEventListener('click', toggleContrast);
+      $('#statsBtn').addEventListener('click', () => { renderStats(); openModal('statsModal'); });
+      $('#helpBtn').addEventListener('click', () => openModal('helpModal'));
+      $('#clearBtn').addEventListener('click', () => {
+        $('#engineQuery').value = '';
+        $('#searchBoxContainer').classList.remove('has-value');
+        $('#engineQuery').focus();
+        executeSearch();
+      });
+      $('#openAllBtn').addEventListener('click', openAll);
+      $('#luckyBtn').addEventListener('click', feelingLucky);
+      $('#exportBtn').addEventListener('click', exportResults);
+      $('#sortSelect').addEventListener('change', () => { currentPage = 0; applySortAndFilter(); });
+      $('#filterResultsInput').addEventListener('input', debounce(() => { currentPage = 0; applySortAndFilter(); }, 250));
+
+      // [13] Toggle vista
+      const container = $('#resultsContainer');
+      const savedView = localStorage.getItem(STORAGE.view);
+      if (savedView === 'grid') container.classList.add('grid-view');
+      $('#viewToggle').addEventListener('click', () => {
+        container.classList.toggle('grid-view');
+        localStorage.setItem(STORAGE.view, container.classList.contains('grid-view') ? 'grid' : 'list');
+      });
+
+      // Cerrar suggestions al hacer click fuera
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-wrapper')) {
+          $('#suggestions').classList.remove('show');
+        }
+      });
+
+      // Búsqueda inicial
+      executeSearch();
+    }
+
+    // [58] requestIdleCallback
+    const initLater = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+    initLater(init);
   </script>
 </body>
 </html>
