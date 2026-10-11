@@ -4,6 +4,8 @@
 
 ### Navegador ultraligero, seguro y sin publicidad
 
+> AVISO: OCS Browser esta pensado para tener un navegador extra en tu PC por si en el tuyo valla
+
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge)](https://github.com/David4524-maker)
